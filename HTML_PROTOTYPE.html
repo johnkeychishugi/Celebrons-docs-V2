@@ -1,0 +1,2521 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Prototype fonctionnel de l'application interne Celebrons V2">
+  <title>Celebrons V2 — Prototype</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap');
+    :root {
+      --burgundy: #691b2c;
+      --burgundy-dark: #3f0d18;
+      --burgundy-soft: #f5e9ec;
+      --ink: #2b171c;
+      --muted: #776b6e;
+      --paper: #f8f4f1;
+      --surface: #fffefd;
+      --line: #eadde0;
+      --gold: #c7a15a;
+      --gold-dark: #98712f;
+      --green: #26715d;
+      --green-soft: #e2f2eb;
+      --amber: #9a6717;
+      --amber-soft: #fff0cf;
+      --red: #a5453f;
+      --red-soft: #fbe8e6;
+      --blue: #466988;
+      --blue-soft: #e7f0f8;
+      --shadow: 0 18px 50px rgba(42, 33, 18, .08);
+      --radius: 18px;
+      --font-body: "DM Sans", sans-serif;
+      --font-display: "Playfair Display", serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    [hidden] { display: none !important; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font: 14px/1.5 var(--font-body);
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    a { color: inherit; text-decoration: none; }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); border: 0;
+    }
+
+    /* Public website — cinematic rhythm inspired by Celebrons V1 */
+    .public-site { min-height: 100vh; background: white; }
+    .public-nav {
+      position: absolute; inset: 0 0 auto; height: 90px; padding: 0 clamp(22px, 5vw, 76px);
+      z-index: 10; display: flex; align-items: center; color: white;
+      border-bottom: 1px solid rgba(255,255,255,.18);
+    }
+    .public-logo {
+      display: flex; align-items: center; gap: 12px; font: 24px var(--font-display);
+      letter-spacing: .02em;
+    }
+    .public-logo-mark {
+      width: 38px; height: 38px; border: 1px solid var(--gold); border-radius: 50%;
+      display: grid; place-items: center; color: var(--gold); font-style: italic;
+    }
+    .public-logo small {
+      display: block; margin-top: 2px; color: #e8d4d9; font: 8px/1.1 var(--font-body);
+      letter-spacing: .2em; text-transform: uppercase;
+    }
+    .public-links { margin-left: auto; display: flex; align-items: center; gap: clamp(18px, 3vw, 40px); }
+    .public-links a {
+      position: relative; font-size: 11px; font-weight: 750; letter-spacing: .1em; text-transform: uppercase;
+    }
+    .public-links a:not(.portal-link)::after {
+      content: ""; position: absolute; left: 0; right: 100%; bottom: -7px; height: 1px;
+      background: var(--gold); transition: .2s ease;
+    }
+    .public-links a:hover::after { right: 0; }
+    .portal-link {
+      min-height: 42px; padding: 0 17px; border: 1px solid rgba(255,255,255,.6);
+      border-radius: 999px; display: inline-flex; align-items: center; gap: 8px;
+    }
+    .public-menu { display: none; margin-left: auto; color: white; border-color: rgba(255,255,255,.35); background: transparent; }
+    .public-hero {
+      min-height: 760px; height: 100vh; position: relative; overflow: hidden; color: white;
+      background:
+        linear-gradient(90deg, rgba(48,6,16,.9) 0%, rgba(68,10,24,.65) 46%, rgba(28,5,10,.28) 100%),
+        url("../Celebrons%20V1%20HTML/images/bg/01.JPG") center 35% / cover;
+      display: flex; align-items: center;
+    }
+    .public-hero::before {
+      content: ""; position: absolute; inset: 0; opacity: .16;
+      background-image: radial-gradient(rgba(255,255,255,.7) .6px, transparent .6px);
+      background-size: 7px 7px; pointer-events: none;
+    }
+    .public-hero-content {
+      width: min(760px, 88%); margin-left: clamp(24px, 9vw, 140px); padding-top: 70px;
+      position: relative; z-index: 1;
+    }
+    .public-kicker {
+      margin-bottom: 20px; display: flex; align-items: center; gap: 12px;
+      color: #ecd49d; font-size: 10px; font-weight: 800; letter-spacing: .22em; text-transform: uppercase;
+    }
+    .public-kicker::before { content: ""; width: 44px; height: 1px; background: var(--gold); }
+    .public-hero h1 {
+      max-width: 720px; margin-bottom: 22px; font: clamp(48px, 6.4vw, 92px)/.97 var(--font-display);
+      letter-spacing: -.045em;
+    }
+    .public-hero h1 em { color: #e3c47f; font-weight: 400; }
+    .public-hero p { max-width: 570px; color: #f0e7e9; font-size: 16px; }
+    .hero-actions { margin-top: 32px; display: flex; gap: 12px; flex-wrap: wrap; }
+    .public-hero .btn { min-height: 50px; padding: 0 22px; }
+    .public-hero .btn.gold { color: var(--burgundy-dark); background: var(--gold); }
+    .public-hero .btn.ghost { color: white; background: transparent; border-color: rgba(255,255,255,.45); }
+    .hero-proof {
+      position: absolute; right: clamp(24px, 5vw, 72px); bottom: 48px; z-index: 2;
+      display: flex; gap: 28px; color: #eadfe1;
+    }
+    .hero-proof strong { display: block; color: white; font: 25px var(--font-display); }
+    .hero-proof span { font-size: 9px; letter-spacing: .12em; text-transform: uppercase; }
+    .public-section { padding: clamp(76px, 9vw, 130px) clamp(24px, 8vw, 120px); }
+    .public-section-head { max-width: 740px; margin-bottom: 48px; }
+    .public-section h2 { font-size: clamp(36px, 4.4vw, 62px); color: var(--burgundy-dark); letter-spacing: -.03em; }
+    .public-section-head > p { max-width: 610px; margin-top: 14px; font-size: 15px; }
+    .service-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: #dfd1d4; border: 1px solid #dfd1d4; }
+    .service-card { min-height: 310px; padding: 34px; background: white; display: flex; flex-direction: column; }
+    .service-number { color: var(--gold-dark); font: 13px var(--font-display); }
+    .service-card h3 { margin-top: auto; color: var(--burgundy); font: 25px var(--font-display); }
+    .service-card p { margin-bottom: 0; color: var(--muted); }
+    .about-band {
+      min-height: 620px; display: grid; grid-template-columns: 1fr 1fr; background: var(--burgundy-dark); color: white;
+    }
+    .about-image {
+      min-height: 520px; background:
+        linear-gradient(rgba(63,13,24,.12), rgba(63,13,24,.22)),
+        url("../Celebrons%20V1%20HTML/images/bg/About01.JPG") center / cover;
+    }
+    .about-copy { padding: clamp(60px, 8vw, 120px); display: grid; align-content: center; }
+    .about-copy h2 { margin: 10px 0 22px; color: white; font-size: clamp(36px, 4vw, 58px); }
+    .about-copy p { color: #dccdd1; font-size: 15px; }
+    .about-copy .btn { margin-top: 16px; width: fit-content; color: var(--burgundy-dark); background: var(--gold); }
+    .public-gallery { padding-top: 0; }
+    .gallery-grid { display: grid; grid-template-columns: 1.1fr .9fr .9fr; gap: 12px; }
+    .gallery-shot {
+      min-height: 430px; padding: 24px; display: flex; align-items: flex-end; color: white;
+      background-position: center; background-size: cover; position: relative; overflow: hidden;
+    }
+    .gallery-shot::after { content: ""; position: absolute; inset: 40% 0 0; background: linear-gradient(transparent, rgba(45,6,15,.8)); }
+    .gallery-shot:nth-child(1) { background-image: url("../Celebrons%20V1%20HTML/images/bg/03.JPG"); }
+    .gallery-shot:nth-child(2) { background-image: url("../Celebrons%20V1%20HTML/images/bg/06.JPG"); }
+    .gallery-shot:nth-child(3) { background-image: url("../Celebrons%20V1%20HTML/images/bg/09.JPG"); }
+    .gallery-shot div { position: relative; z-index: 1; }
+    .gallery-shot h3 { margin-bottom: 2px; font: 23px var(--font-display); }
+    .public-cta {
+      margin: 0 clamp(24px, 5vw, 74px) 74px; padding: clamp(48px, 6vw, 86px);
+      color: white; background: var(--burgundy); display: flex; align-items: center; justify-content: space-between; gap: 30px;
+    }
+    .public-cta h2 { max-width: 650px; margin: 0; color: white; font-size: clamp(34px, 4vw, 58px); }
+    .public-cta .btn { flex: 0 0 auto; min-height: 50px; color: var(--burgundy-dark); background: var(--gold); }
+    .public-footer {
+      padding: 34px clamp(24px, 5vw, 74px); color: #d8c8cc; background: #29070f;
+      display: flex; align-items: center; justify-content: space-between; gap: 20px;
+    }
+    .public-footer strong { color: white; font: 20px var(--font-display); }
+    .hero-tagline { margin-top: 24px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .hero-tagline span {
+      padding: 7px 11px; border: 1px solid rgba(255,255,255,.2); border-radius: 999px;
+      color: #eadde0; background: rgba(255,255,255,.06); font-size: 9px;
+      letter-spacing: .08em; text-transform: uppercase; backdrop-filter: blur(8px);
+    }
+    .hero-side-card {
+      position: absolute; right: clamp(24px, 6vw, 92px); top: 50%; z-index: 2;
+      width: 245px; padding: 22px; border: 1px solid rgba(255,255,255,.17);
+      border-radius: 18px; color: white; background: rgba(49,7,17,.54);
+      backdrop-filter: blur(16px); transform: translateY(-35%);
+    }
+    .hero-side-card > span { color: #e5c886; font-size: 9px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
+    .hero-side-card h3 { margin: 12px 0 18px; font: 25px/1.15 var(--font-display); }
+    .hero-side-item { padding: 11px 0; border-top: 1px solid rgba(255,255,255,.13); display: flex; align-items: center; gap: 10px; }
+    .hero-side-item i { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; color: var(--burgundy-dark); background: var(--gold); font-style: normal; font-size: 10px; }
+    .hero-side-item strong, .hero-side-item small { display: block; }
+    .hero-side-item small { color: #d9c9cd; font-size: 9px; }
+    .public-intro {
+      padding: clamp(65px,8vw,110px) clamp(24px,8vw,120px);
+      display: grid; grid-template-columns: minmax(0,1.25fr) minmax(300px,.75fr); gap: clamp(40px,8vw,120px); align-items: end;
+      background: #fff;
+    }
+    .public-intro h2 { max-width: 780px; margin: 0; color: var(--burgundy-dark); font: clamp(38px,5vw,68px)/1.02 var(--font-display); letter-spacing: -.04em; }
+    .public-intro h2 em { color: var(--gold-dark); font-weight: 500; }
+    .intro-copy p { color: var(--muted); font-size: 15px; }
+    .intro-link { margin-top: 15px; display: inline-flex; align-items: center; gap: 8px; color: var(--burgundy); font-weight: 800; }
+    .public-metrics { padding: 0 clamp(24px,8vw,120px) clamp(70px,8vw,110px); display: grid; grid-template-columns: repeat(4,1fr); }
+    .public-metric { padding: 22px 24px; border-left: 1px solid var(--line); }
+    .public-metric:first-child { border-left: 0; }
+    .public-metric strong { display: block; color: var(--burgundy); font: 34px var(--font-display); }
+    .public-metric span { color: var(--muted); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+    .service-card { position: relative; overflow: hidden; transition: .25s ease; }
+    .service-card::before { content: ""; position: absolute; inset: auto 0 0; height: 3px; background: var(--gold); transform: scaleX(0); transform-origin: left; transition: .25s ease; }
+    .service-card:hover { z-index: 1; transform: translateY(-5px); box-shadow: 0 24px 55px rgba(63,13,24,.1); }
+    .service-card:hover::before { transform: scaleX(1); }
+    .service-icon { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; color: var(--burgundy); background: var(--burgundy-soft); font-size: 17px; }
+    .service-card .service-number { position: absolute; right: 28px; top: 26px; }
+    .service-card a { margin-top: 18px; color: var(--burgundy); font-size: 11px; font-weight: 800; }
+    .process-section { padding: clamp(75px,9vw,120px) clamp(24px,8vw,120px); color: white; background: var(--burgundy-dark); }
+    .process-head { max-width: 690px; margin-bottom: 48px; }
+    .process-head h2 { margin: 8px 0 14px; color: white; font-size: clamp(38px,4.6vw,62px); }
+    .process-head p { color: #d8c5ca; }
+    .process-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 0; }
+    .process-step { padding: 25px 28px; border-left: 1px solid rgba(255,255,255,.14); }
+    .process-step:first-child { border-left: 0; }
+    .process-step span { color: var(--gold); font: 14px var(--font-display); }
+    .process-step h3 { margin: 42px 0 9px; font: 21px var(--font-display); }
+    .process-step p { margin: 0; color: #cdbbc0; font-size: 11px; }
+    .testimonial-band {
+      padding: clamp(70px,8vw,115px) clamp(24px,12vw,180px); text-align: center; background: #f8f1f0;
+    }
+    .testimonial-band blockquote { max-width: 900px; margin: 12px auto 22px; color: var(--burgundy-dark); font: clamp(30px,4vw,52px)/1.18 var(--font-display); }
+    .testimonial-band cite { color: var(--muted); font-style: normal; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
+    .public-footer-rich { padding: 65px clamp(24px,8vw,120px) 30px; color: #d8c8cc; background: #29070f; }
+    .footer-grid { display: grid; grid-template-columns: 1.35fr .65fr .65fr .8fr; gap: 45px; }
+    .footer-brand strong { display: block; margin-bottom: 14px; color: white; font: 30px var(--font-display); }
+    .footer-brand p { max-width: 320px; color: #a99399; }
+    .footer-col b { display: block; margin-bottom: 14px; color: var(--gold); font-size: 9px; letter-spacing: .14em; text-transform: uppercase; }
+    .footer-col a, .footer-col span { display: block; margin: 9px 0; color: #cdbbc0; font-size: 11px; }
+    .footer-bottom { margin-top: 50px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,.1); display: flex; justify-content: space-between; gap: 20px; color: #8f777d; font-size: 10px; }
+
+    .app { min-height: 100vh; display: grid; grid-template-columns: 250px minmax(0, 1fr); }
+    .sidebar {
+      position: sticky; top: 0; height: 100vh; padding: 24px 16px;
+      color: white; background: linear-gradient(180deg, var(--burgundy-dark), #5b1524 68%, #2e0911);
+      display: flex; flex-direction: column; z-index: 20; overflow-y: auto;
+    }
+    .brand {
+      display: flex; align-items: center; gap: 11px; padding: 2px 10px 28px;
+      font-family: var(--font-display); font-size: 22px; letter-spacing: .02em;
+    }
+    .brand-mark {
+      width: 34px; height: 34px; border: 1px solid #d7b77d; border-radius: 50%;
+      display: grid; place-items: center; color: #d7b77d; font-size: 18px;
+    }
+    .nav-label {
+      padding: 0 12px 8px; color: #969a91; font-size: 10px;
+      font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+    }
+    .nav { display: grid; gap: 3px; }
+    .nav button {
+      width: 100%; border: 0; border-radius: 11px; padding: 11px 12px;
+      color: #c8cbc3; background: transparent; display: flex; align-items: center;
+      gap: 11px; text-align: left; transition: .2s ease;
+    }
+    .nav button:hover, .nav button.active { color: white; background: rgba(255,255,255,.1); }
+    .nav button.active { box-shadow: inset 3px 0 0 var(--gold); }
+    .nav-icon { width: 20px; text-align: center; color: #dfbf80; }
+    .nav-count {
+      margin-left: auto; min-width: 22px; padding: 1px 6px; border-radius: 20px;
+      color: var(--burgundy-dark); background: var(--gold); font-size: 11px; text-align: center;
+    }
+    .sidebar-foot {
+      margin-top: auto; padding: 14px 10px; border-top: 1px solid rgba(255,255,255,.1);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center;
+      color: var(--burgundy-dark); background: linear-gradient(135deg, #e0c386, #aa8038); font-weight: 800;
+    }
+    .profile-meta { min-width: 0; }
+    .profile-meta strong, .profile-meta small { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .profile-meta small { color: #969a91; font-size: 11px; }
+
+    .main { min-width: 0; }
+    .topbar {
+      height: 76px; padding: 0 34px; border-bottom: 1px solid var(--line);
+      background: rgba(245,242,235,.88); backdrop-filter: blur(12px);
+      display: flex; align-items: center; gap: 18px; position: sticky; top: 0; z-index: 15;
+    }
+    .menu-toggle { display: none; }
+    .search {
+      width: min(380px, 40vw); height: 42px; padding: 0 14px; border: 1px solid var(--line);
+      border-radius: 12px; background: var(--surface); display: flex; align-items: center; gap: 9px;
+    }
+    .search input { width: 100%; border: 0; outline: 0; color: var(--ink); background: transparent; }
+    .top-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    .icon-btn {
+      width: 42px; height: 42px; border: 1px solid var(--line); border-radius: 12px;
+      background: var(--surface); color: var(--ink); position: relative;
+    }
+    .dot {
+      position: absolute; top: 8px; right: 9px; width: 7px; height: 7px;
+      border-radius: 50%; background: var(--red); border: 1px solid white;
+    }
+    .btn {
+      min-height: 42px; border: 0; border-radius: 12px; padding: 0 16px;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      color: white; background: var(--burgundy); font-weight: 650;
+      box-shadow: 0 8px 22px rgba(105,27,44,.18);
+    }
+    .btn:hover { background: var(--burgundy-dark); }
+    .btn.gold { background: var(--gold-dark); }
+    .btn.ghost { color: var(--ink); background: var(--surface); border: 1px solid var(--line); box-shadow: none; }
+    .btn.small { min-height: 34px; padding: 0 12px; border-radius: 10px; font-size: 12px; }
+    .top-actions .btn b { display: none; }
+
+    .content { padding: 30px 34px 52px; max-width: 1600px; margin: 0 auto; }
+    .view { display: none; animation: appear .25s ease; }
+    .view.active { display: block; }
+    @keyframes appear { from { opacity: 0; transform: translateY(4px); } }
+    .page-head {
+      margin-bottom: 24px; display: flex; align-items: flex-end; justify-content: space-between; gap: 20px;
+    }
+    .eyebrow {
+      margin: 0 0 5px; color: var(--gold-dark); font-size: 11px; font-weight: 800;
+      letter-spacing: .14em; text-transform: uppercase;
+    }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin-bottom: 5px; font: 36px/1.1 var(--font-display); }
+    h2 { margin-bottom: 4px; font: 24px/1.2 var(--font-display); }
+    h3 { margin-bottom: 4px; font-size: 15px; }
+    .subtle { color: var(--muted); }
+
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+    .stat, .card {
+      border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface);
+      box-shadow: 0 4px 18px rgba(42,33,18,.025);
+    }
+    .stat { padding: 19px; }
+    .stat-top { display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-size: 12px; }
+    .stat-icon {
+      width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center;
+      color: var(--gold-dark); background: #f2e8d7;
+    }
+    .stat-value { margin: 10px 0 3px; font-size: 28px; font-weight: 750; letter-spacing: -.03em; }
+    .trend { color: var(--green); font-size: 11px; }
+    .dashboard-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(280px, .75fr); gap: 18px; }
+    .card { padding: 20px; overflow: hidden; }
+    .card-head { margin-bottom: 17px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .card-head p { margin: 2px 0 0; font-size: 12px; }
+
+    .event-list { display: grid; }
+    .event-row {
+      padding: 14px 0; border-top: 1px solid var(--line);
+      display: grid; grid-template-columns: 52px minmax(150px, 1.3fr) 1fr .7fr auto;
+      gap: 14px; align-items: center;
+    }
+    .date-box {
+      width: 48px; height: 51px; border-radius: 12px; background: #f0e6d5;
+      display: grid; place-content: center; text-align: center;
+    }
+    .date-box strong { font-size: 19px; line-height: 1; }
+    .date-box span { margin-top: 3px; color: var(--gold-dark); font-size: 9px; font-weight: 800; text-transform: uppercase; }
+    .event-title strong, .event-title small { display: block; }
+    .event-title small { color: var(--muted); margin-top: 2px; }
+    .people { display: flex; }
+    .mini-avatar {
+      width: 27px; height: 27px; margin-left: -6px; border: 2px solid var(--surface);
+      border-radius: 50%; display: grid; place-items: center; color: white; background: #6b7a72;
+      font-size: 9px; font-weight: 700;
+    }
+    .people .mini-avatar:first-child { margin-left: 0; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px; padding: 5px 9px;
+      border-radius: 20px; font-size: 10px; font-weight: 750; white-space: nowrap;
+    }
+    .badge::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+    .badge.green { color: var(--green); background: var(--green-soft); }
+    .badge.amber { color: var(--amber); background: var(--amber-soft); }
+    .badge.blue { color: var(--blue); background: var(--blue-soft); }
+    .badge.red { color: var(--red); background: var(--red-soft); }
+
+    .calendar-head { display: grid; grid-template-columns: repeat(7, 1fr); margin: 8px 0; color: var(--muted); font-size: 10px; text-align: center; }
+    .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+    .day {
+      aspect-ratio: 1; border-radius: 9px; display: grid; place-items: center;
+      color: var(--ink); background: #faf7f1; font-size: 11px; position: relative;
+    }
+    .day.muted { opacity: .35; }
+    .day.today { color: white; background: var(--ink); font-weight: 700; }
+    .day.event-day::after { content: ""; position: absolute; bottom: 5px; width: 4px; height: 4px; border-radius: 50%; background: var(--gold); }
+    .today.event-day::after { background: white; }
+    .readiness { margin-top: 20px; }
+    .readiness-row { margin: 14px 0; }
+    .progress-label { margin-bottom: 6px; display: flex; justify-content: space-between; font-size: 11px; }
+    .progress { height: 6px; border-radius: 10px; background: #eee8dd; overflow: hidden; }
+    .progress span { display: block; height: 100%; border-radius: inherit; background: var(--green); }
+
+    .toolbar {
+      margin-bottom: 16px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    .field {
+      min-height: 40px; padding: 0 12px; border: 1px solid var(--line); border-radius: 11px;
+      color: var(--ink); background: var(--surface); outline: none;
+    }
+    .field:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(182,135,67,.12); }
+    .table-card { padding: 0; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 760px; }
+    th, td { padding: 15px 18px; border-bottom: 1px solid var(--line); text-align: left; }
+    th { color: var(--muted); background: #fbf8f2; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+    td strong, td small { display: block; }
+    td small { margin-top: 2px; color: var(--muted); }
+    tr:last-child td { border-bottom: 0; }
+
+    .workspace-tabs {
+      margin: -4px 0 20px; border-bottom: 1px solid var(--line);
+      display: flex; gap: 24px; overflow-x: auto;
+    }
+    .workspace-tabs button {
+      padding: 12px 2px; border: 0; border-bottom: 2px solid transparent;
+      color: var(--muted); background: transparent; white-space: nowrap;
+    }
+    .workspace-tabs button.active { color: var(--ink); border-bottom-color: var(--gold-dark); font-weight: 700; }
+
+    .event-command-head {
+      margin-bottom: 18px; padding: 26px; border-radius: 22px; color: white;
+      background:
+        linear-gradient(105deg, rgba(63,13,24,.98), rgba(105,27,44,.91)),
+        url("../Celebrons%20V1%20HTML/images/bg/17.JPG") center / cover;
+      box-shadow: 0 20px 55px rgba(63,13,24,.16);
+    }
+    .event-command-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+    .event-command-head .eyebrow { color: #e8cb91; }
+    .event-command-head h1 { margin-bottom: 10px; color: white; }
+    .event-command-head p { color: #eadde0; }
+    .event-command-head .badge { color: var(--burgundy-dark); background: #e8ca8e; }
+    .event-command-head .btn.ghost { color: white; background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.28); }
+    .event-facts {
+      margin-top: 28px; padding-top: 22px; border-top: 1px solid rgba(255,255,255,.18);
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 18px;
+    }
+    .event-facts span, .event-facts strong { display: block; }
+    .event-facts span { margin-bottom: 5px; color: #cfb9be; font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+    .event-facts strong { font-size: 13px; }
+    .event-command-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(280px, .55fr); gap: 18px; }
+    .module-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .event-module {
+      min-height: 172px; padding: 18px; border: 1px solid var(--line); border-radius: 15px;
+      background: var(--surface); display: flex; flex-direction: column; transition: .2s ease;
+    }
+    .event-module:hover { border-color: #cba4ad; transform: translateY(-2px); box-shadow: var(--shadow); }
+    .event-module-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .event-module .ops-icon { margin: 0; color: var(--burgundy); background: var(--burgundy-soft); }
+    .event-module h3 { margin: auto 0 4px; color: var(--burgundy-dark); }
+    .event-module p { margin-bottom: 0; font-size: 11px; }
+    .event-module-progress { margin-top: 10px; color: var(--muted); font-size: 10px; }
+    .timeline { display: grid; }
+    .timeline-item { padding: 0 0 18px 24px; border-left: 1px solid var(--line); position: relative; }
+    .timeline-item::before {
+      content: ""; position: absolute; left: -5px; top: 2px; width: 9px; height: 9px;
+      border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 4px var(--surface);
+    }
+    .timeline-item:last-child { padding-bottom: 0; border-color: transparent; }
+    .timeline-item strong, .timeline-item small { display: block; }
+    .timeline-item small { margin-top: 2px; color: var(--muted); font-size: 10px; }
+
+    .floor-grid { display: grid; grid-template-columns: 220px minmax(0, 1fr) 240px; gap: 14px; }
+    .palette, .guest-panel { padding: 16px; }
+    .palette-item {
+      margin-top: 9px; padding: 11px; border: 1px solid var(--line); border-radius: 11px;
+      display: flex; align-items: center; gap: 10px; background: #fbf8f1;
+    }
+    .shape { width: 29px; height: 29px; border: 2px solid var(--gold-dark); }
+    .shape.round { border-radius: 50%; }
+    .shape.long { width: 38px; border-radius: 5px; }
+    .floor {
+      height: 590px; min-width: 500px; padding: 18px; border: 1px solid var(--line);
+      border-radius: var(--radius); background-color: #fffdf8;
+      background-image:
+        linear-gradient(rgba(182,135,67,.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(182,135,67,.08) 1px, transparent 1px);
+      background-size: 24px 24px; position: relative; overflow: hidden;
+      box-shadow: inset 0 0 0 10px #eee5d8;
+    }
+    .floor-label {
+      position: absolute; padding: 6px 12px; border: 1px dashed #ad9a7e;
+      border-radius: 8px; color: var(--muted); background: rgba(255,253,248,.9);
+      font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+    }
+    .stage { top: 30px; left: 34%; width: 32%; text-align: center; }
+    .entrance { bottom: 25px; left: 42%; }
+    .floor-table {
+      position: absolute; width: 78px; height: 78px; border: 2px solid var(--gold-dark);
+      border-radius: 50%; background: #fff7e8; display: grid; place-items: center;
+      box-shadow: 0 6px 16px rgba(72,49,17,.12); user-select: none; touch-action: none;
+      cursor: grab; font-size: 11px; font-weight: 750;
+    }
+    .floor-table:active { cursor: grabbing; }
+    .floor-table.selected { outline: 4px solid rgba(38,113,93,.18); border-color: var(--green); }
+    .floor-table::before {
+      content: attr(data-seats); position: absolute; bottom: -19px; color: var(--muted);
+      font-size: 9px; font-weight: 500;
+    }
+    .guest-search { width: 100%; margin: 10px 0; }
+    .guest {
+      padding: 10px 0; border-top: 1px solid var(--line); display: flex; align-items: center; gap: 9px;
+    }
+    .guest .mini-avatar { flex: 0 0 auto; margin: 0; }
+    .guest div { min-width: 0; }
+    .guest strong, .guest small { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .guest small { color: var(--muted); font-size: 10px; }
+    .guest .assign { margin-left: auto; color: var(--green); font-size: 10px; }
+    .planner-event-strip {
+      margin-bottom: 14px; padding: 17px 20px; border-radius: 16px; color: white;
+      background: linear-gradient(115deg, #191719, var(--burgundy-dark));
+      display: grid; grid-template-columns: minmax(210px,1fr) repeat(4,auto); align-items: center; gap: 25px;
+    }
+    .planner-event-title span, .planner-event-title strong { display: block; }
+    .planner-event-title span { color: var(--gold); font-size: 8px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+    .planner-event-title strong { margin-top: 3px; font: 19px var(--font-display); }
+    .planner-event-stat { text-align: center; }
+    .planner-event-stat strong, .planner-event-stat span { display: block; }
+    .planner-event-stat strong { color: var(--gold); font-size: 16px; }
+    .planner-event-stat span { color: #baa9ad; font-size: 7px; letter-spacing: .1em; text-transform: uppercase; }
+    .group-filters {
+      margin-bottom: 12px; padding: 10px 13px; border: 1px solid var(--line); border-radius: 12px;
+      background: var(--surface); display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+    }
+    .group-filters > span { margin-right: 3px; color: var(--muted); font-size: 9px; }
+    .group-filter {
+      padding: 5px 9px; border: 1px solid transparent; border-radius: 999px;
+      color: #52606e; background: #eaf1f8; font-size: 8px; font-weight: 700;
+    }
+    .group-filter:nth-of-type(2) { color: #85554b; background: #f6e9e5; }
+    .group-filter:nth-of-type(3) { color: #327359; background: #e4f3eb; }
+    .group-filter:nth-of-type(4) { color: #73568c; background: #efe7f5; }
+    .group-filter:nth-of-type(5) { color: #8b6a32; background: #f8efd9; }
+    .group-filter.active { border-color: var(--burgundy); color: white; background: var(--burgundy); }
+    .planner-toolbar {
+      margin-bottom: 10px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 12px;
+      background: var(--surface); display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    }
+    .tool-btn {
+      min-height: 34px; padding: 0 10px; border: 1px solid transparent; border-radius: 9px;
+      color: var(--muted); background: transparent; display: inline-flex; align-items: center; gap: 6px; font-size: 9px; font-weight: 700;
+    }
+    .tool-btn:hover, .tool-btn.active { color: var(--burgundy); border-color: var(--line); background: var(--burgundy-soft); }
+    .tool-divider { width: 1px; height: 23px; margin: 0 4px; background: var(--line); }
+    .save-state { margin-left: auto; color: var(--green); font-size: 9px; }
+    .planner-workspace {
+      height: 690px; border: 1px solid var(--line); border-radius: 16px; overflow: hidden;
+      background: #f0ece7; display: grid; grid-template-columns: 205px minmax(600px,1fr) 235px;
+      box-shadow: 0 18px 50px rgba(42,33,18,.07);
+    }
+    .planner-library, .planner-inspector { padding: 14px; background: var(--surface); overflow-y: auto; }
+    .planner-library { border-right: 1px solid var(--line); }
+    .planner-inspector { border-left: 1px solid var(--line); }
+    .planner-panel-head { margin-bottom: 14px; }
+    .planner-panel-head h3 { color: var(--burgundy-dark); }
+    .planner-panel-head p { margin: 2px 0 0; color: var(--muted); font-size: 9px; }
+    .library-label { margin: 17px 0 7px; color: var(--muted); font-size: 8px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .library-item {
+      width: 100%; margin-bottom: 7px; padding: 10px; border: 1px solid var(--line); border-radius: 10px;
+      color: var(--ink); background: #fcf9f7; display: flex; align-items: center; gap: 9px; text-align: left;
+    }
+    .library-item:hover { border-color: var(--gold); background: #fffaf0; }
+    .library-shape { width: 31px; height: 31px; border: 2px solid var(--gold-dark); border-radius: 50%; background: #fff7e6; flex: 0 0 auto; }
+    .library-shape.rectangle { width: 38px; height: 24px; border-radius: 5px; }
+    .library-shape.zone { width: 38px; height: 20px; border: 0; border-radius: 4px; background: #24446b; }
+    .library-item strong, .library-item small { display: block; }
+    .library-item strong { font-size: 10px; }
+    .library-item small { color: var(--muted); font-size: 8px; }
+    .planner-stage-wrap { padding: 22px; overflow: auto; position: relative; }
+    .planner-canvas {
+      width: 820px; height: 620px; margin: auto; border: 1px solid #d8d1c9; border-radius: 5px;
+      background-color: white;
+      background-image: radial-gradient(#dcd7d1 .7px, transparent .7px);
+      background-size: 14px 14px; position: relative; transform-origin: top left;
+      box-shadow: 0 8px 24px rgba(42,33,18,.1); overflow: hidden;
+    }
+    .plan-zone {
+      position: absolute; border-radius: 4px; display: grid; place-items: center;
+      color: white; background: #23466f; font-size: 8px; font-weight: 900; letter-spacing: .18em; text-transform: uppercase;
+      box-shadow: 0 3px 8px rgba(22,48,80,.15);
+    }
+    .plan-zone.stage-zone { left: 130px; top: 24px; width: 560px; height: 40px; }
+    .plan-zone.aisle-zone { right: 26px; top: 100px; width: 36px; height: 350px; writing-mode: vertical-rl; }
+    .plan-zone.buffet-zone { right: 26px; bottom: 34px; width: 135px; height: 43px; }
+    .plan-zone.dance-zone { left: 338px; top: 260px; width: 145px; height: 125px; color: #365d13; background: #a8d93d; }
+    .plan-zone.dance-zone::after { content: "PISTE"; transform: rotate(-90deg); }
+    .plan-zone.door-zone { left: 25px; bottom: 35px; width: 86px; height: 35px; background: #7a2335; }
+    .plan-zone.selected { outline: 4px solid rgba(199,161,90,.36); outline-offset: 2px; }
+    .floor-table.plan-table {
+      width: 54px; height: 54px; border: 1px solid #b9cbe0; color: #284f79; background: #eef5fc;
+      box-shadow: 0 3px 8px rgba(42,72,105,.12); font-size: 9px; z-index: 3;
+    }
+    .floor-table.plan-table.group-b { border-color: #e3c6bf; color: #8c574d; background: #f9eeeb; }
+    .floor-table.plan-table.group-c { border-color: #bcddcb; color: #327359; background: #eaf7ef; }
+    .floor-table.plan-table.group-d { border-color: #d6c5e3; color: #705386; background: #f4edf8; }
+    .floor-table.plan-table.group-e { border-color: #e7d5ad; color: #876a36; background: #fbf3df; }
+    .floor-table.plan-table.rectangular { width: 70px; height: 115px; border-radius: 5px; }
+    .floor-table.plan-table::before { bottom: -14px; font-size: 7px; }
+    .chair {
+      position: absolute; width: 9px; height: 9px; border: 1px solid currentColor; border-radius: 50%; background: white;
+    }
+    .chair.c1 { left: 7px; top: -7px; }.chair.c2 { right: 7px; top: -7px; }
+    .chair.c3 { right: -7px; top: 21px; }.chair.c4 { right: 7px; bottom: -7px; }
+    .chair.c5 { left: 7px; bottom: -7px; }.chair.c6 { left: -7px; top: 21px; }
+    .planner-inspector .detail { min-height: 58px; padding: 9px; }
+    .inspector-section { margin-top: 18px; }
+    .inspector-section > b { display: block; margin-bottom: 8px; color: var(--muted); font-size: 8px; letter-spacing: .1em; text-transform: uppercase; }
+    .inspector-field { margin-bottom: 9px; }
+    .inspector-field label { margin-bottom: 4px; }
+    .inspector-field .field { width: 100%; min-height: 35px; font-size: 9px; }
+    .guest-token {
+      margin-bottom: 6px; padding: 8px; border: 1px solid var(--line); border-radius: 9px;
+      display: flex; align-items: center; gap: 7px; background: #fcfaf8;
+    }
+    .guest-token strong, .guest-token small { display: block; }
+    .guest-token strong { font-size: 9px; }.guest-token small { color: var(--muted); font-size: 7px; }
+    .guest-token button { margin-left: auto; border: 0; color: var(--red); background: transparent; }
+    .canvas-zoom {
+      position: sticky; left: 12px; bottom: 12px; width: fit-content; z-index: 8;
+      padding: 5px; border: 1px solid var(--line); border-radius: 10px; background: white;
+      display: flex; align-items: center; gap: 4px; box-shadow: var(--shadow);
+    }
+    .canvas-zoom button { width: 29px; height: 29px; border: 0; border-radius: 7px; color: var(--ink); background: #f7f2ef; }
+    .canvas-zoom span { min-width: 42px; text-align: center; color: var(--muted); font-size: 9px; }
+
+    .finance-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+    .money-card { padding: 20px; }
+    .money-card strong { display: block; margin-top: 10px; font-size: 25px; }
+    .money-card small { color: var(--muted); }
+    .ledger-grid { display: grid; grid-template-columns: 1.3fr .7fr; gap: 18px; }
+    .donut {
+      width: 145px; aspect-ratio: 1; margin: 18px auto; border-radius: 50%;
+      background: conic-gradient(var(--green) 0 64%, var(--gold) 64% 83%, #d9d3c8 83% 100%);
+      position: relative;
+    }
+    .donut::after {
+      content: "64%"; position: absolute; inset: 27px; border-radius: 50%;
+      background: var(--surface); display: grid; place-items: center; font-size: 21px; font-weight: 750;
+    }
+    .legend { display: grid; gap: 8px; }
+    .legend div { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 11px; }
+    .legend i { width: 9px; height: 9px; border-radius: 50%; }
+
+    .ops-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .ops-card { min-height: 210px; }
+    .ops-icon {
+      width: 40px; height: 40px; margin-bottom: 18px; border-radius: 12px;
+      display: grid; place-items: center; color: var(--gold-dark); background: #f2e8d7;
+    }
+    .check-list { margin-top: 14px; display: grid; gap: 8px; }
+    .check { display: flex; gap: 8px; color: var(--muted); font-size: 11px; }
+    .check.done { color: var(--green); }
+
+    .section-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .feature-card {
+      min-height: 170px; padding: 20px; border: 1px solid var(--line); border-radius: var(--radius);
+      background: var(--surface); display: flex; flex-direction: column; transition: .2s ease;
+    }
+    .feature-card:hover { border-color: #cfacb4; transform: translateY(-2px); box-shadow: var(--shadow); }
+    .feature-card h3 { margin-top: auto; color: var(--burgundy-dark); }
+    .feature-card p { margin-bottom: 0; color: var(--muted); font-size: 12px; }
+    .feature-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .split-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(280px, .65fr); gap: 18px; }
+    .stack { display: grid; gap: 14px; }
+    .venue-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .venue-card {
+      border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden;
+      background: var(--surface); transition: .2s ease;
+    }
+    .venue-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+    .venue-image { height: 180px; background-position: center; background-size: cover; position: relative; }
+    .venue-image .badge { position: absolute; top: 13px; left: 13px; background: rgba(255,255,255,.92); }
+    .venue-body { padding: 18px; }
+    .venue-body h3 { color: var(--burgundy-dark); font: 22px var(--font-display); }
+    .venue-meta { margin: 13px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+    .venue-meta span { padding: 8px; border-radius: 9px; color: var(--muted); background: #faf6f4; font-size: 10px; }
+    .media-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .media-item {
+      min-height: 190px; padding: 14px; border-radius: 14px; overflow: hidden;
+      display: flex; align-items: flex-end; color: white; background-position: center; background-size: cover;
+      position: relative;
+    }
+    .media-item::after { content: ""; position: absolute; inset: 45% 0 0; background: linear-gradient(transparent, rgba(43,8,17,.85)); }
+    .media-item div { position: relative; z-index: 1; }
+    .media-item strong, .media-item small { display: block; }
+    .media-item small { color: #eadde0; }
+    .metric-bar { margin: 13px 0; }
+    .metric-bar-label { margin-bottom: 6px; display: flex; justify-content: space-between; font-size: 11px; }
+    .bar-chart { height: 220px; display: flex; align-items: flex-end; gap: 12px; padding-top: 25px; }
+    .bar-col { flex: 1; height: 100%; display: flex; align-items: flex-end; justify-content: center; position: relative; }
+    .bar-col i { width: min(42px, 72%); border-radius: 8px 8px 2px 2px; background: linear-gradient(var(--burgundy), var(--burgundy-dark)); }
+    .bar-col span { position: absolute; bottom: -24px; color: var(--muted); font-size: 9px; }
+    .permission-grid { width: 100%; overflow-x: auto; }
+    .permission-grid table { min-width: 900px; }
+    .permission-check {
+      width: 20px; height: 20px; margin: auto; border-radius: 6px; display: grid; place-items: center;
+      color: white; background: var(--green); font-size: 10px;
+    }
+    .permission-check.off { color: var(--muted); background: #eee8e7; }
+    .movement {
+      padding: 12px 0; border-top: 1px solid var(--line); display: flex; align-items: center; gap: 12px;
+    }
+    .movement:first-child { border-top: 0; }
+    .movement-icon {
+      width: 35px; height: 35px; border-radius: 10px; display: grid; place-items: center;
+      color: var(--burgundy); background: var(--burgundy-soft);
+    }
+    .movement div { min-width: 0; flex: 1; }
+    .movement strong, .movement small { display: block; }
+    .movement small { color: var(--muted); font-size: 10px; }
+    .empty-note {
+      padding: 30px; border: 1px dashed #cfbfc2; border-radius: 14px; color: var(--muted);
+      background: #fcfaf8; text-align: center;
+    }
+    .role-chip {
+      display: inline-flex; padding: 4px 8px; border-radius: 7px; color: var(--burgundy);
+      background: var(--burgundy-soft); font-size: 10px; font-weight: 700;
+    }
+    .client-shell {
+      min-height: 680px; border-radius: 22px; overflow: hidden; background: #fff;
+      box-shadow: var(--shadow); border: 1px solid var(--line);
+    }
+    .client-head {
+      padding: 26px 30px; color: white; background: linear-gradient(110deg, var(--burgundy-dark), var(--burgundy));
+      display: flex; align-items: center; justify-content: space-between; gap: 20px;
+    }
+    .client-content { padding: 26px; }
+    .client-hero { margin-bottom: 20px; display: grid; grid-template-columns: 1.2fr .8fr; gap: 20px; }
+    .client-event {
+      min-height: 250px; padding: 28px; border-radius: 17px; color: white;
+      background: linear-gradient(90deg, rgba(63,13,24,.9), rgba(63,13,24,.25)),
+        url("../Celebrons%20V1%20HTML/images/bg/18.JPG") center / cover;
+      display: flex; flex-direction: column; justify-content: flex-end;
+    }
+    .client-event h2 { color: white; font-size: 36px; }
+
+    dialog {
+      width: min(620px, calc(100% - 28px)); padding: 0; border: 0;
+      border-radius: 22px; background: var(--surface); box-shadow: var(--shadow);
+    }
+    dialog::backdrop { background: rgba(21,20,17,.55); backdrop-filter: blur(3px); }
+    .modal-head { padding: 22px 24px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; }
+    .close { border: 0; background: transparent; font-size: 22px; }
+    .modal-body { padding: 22px 24px; }
+    .login-brand { margin-bottom: 22px; text-align: center; }
+    .login-brand .public-logo-mark { margin: 0 auto 12px; color: var(--gold-dark); border-color: var(--gold); }
+    .login-brand h2 { color: var(--burgundy-dark); font-size: 30px; }
+    .login-brand p { margin-bottom: 0; }
+    .google-btn {
+      width: 100%; min-height: 48px; border: 1px solid var(--line); border-radius: 12px;
+      color: var(--ink); background: white; display: flex; align-items: center; justify-content: center;
+      gap: 10px; font-weight: 700;
+    }
+    .google-mark {
+      width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center;
+      color: white; background: var(--burgundy); font-family: var(--font-display);
+    }
+    .login-note {
+      margin: 17px 0 0; padding: 12px; border-radius: 10px; color: var(--muted);
+      background: var(--burgundy-soft); font-size: 11px; text-align: center;
+    }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    label { display: grid; gap: 6px; color: var(--muted); font-size: 11px; font-weight: 650; }
+    label.full { grid-column: 1 / -1; }
+    label input, label select { width: 100%; }
+    .modal-foot { padding: 16px 24px; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; gap: 9px; }
+    .toast {
+      position: fixed; right: 24px; bottom: 24px; z-index: 50; padding: 13px 17px;
+      border-radius: 12px; color: white; background: var(--ink); box-shadow: var(--shadow);
+      transform: translateY(100px); opacity: 0; transition: .25s ease;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    :focus-visible { outline: 3px solid rgba(199,161,90,.42); outline-offset: 2px; }
+    ::selection { color: white; background: var(--burgundy); }
+    .card, .stat, .feature-card, .event-module, .venue-card { transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease; }
+    .stat:hover, .card:hover { border-color: #d9c3c8; box-shadow: 0 14px 38px rgba(63,13,24,.06); }
+    .btn:active { transform: translateY(1px); }
+    .field:disabled { opacity: .65; cursor: not-allowed; }
+    .drawer-backdrop {
+      position: fixed; inset: 0; z-index: 80; background: rgba(32,7,13,.48);
+      backdrop-filter: blur(3px); opacity: 0; pointer-events: none; transition: opacity .25s ease;
+    }
+    .drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+    .drawer {
+      position: fixed; top: 0; right: 0; z-index: 90; width: min(620px, 100%);
+      height: 100vh; color: var(--ink); background: var(--surface);
+      box-shadow: -30px 0 80px rgba(35,6,13,.2); transform: translateX(105%);
+      transition: transform .28s ease; display: flex; flex-direction: column;
+    }
+    .drawer.open { transform: translateX(0); }
+    .drawer-head {
+      padding: 24px 26px 20px; border-bottom: 1px solid var(--line);
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 18px;
+      background: linear-gradient(180deg, #fff, #fcf8f7);
+    }
+    .drawer-head h2 { margin: 3px 0 0; color: var(--burgundy-dark); font-size: 30px; }
+    .drawer-close {
+      width: 40px; height: 40px; border: 1px solid var(--line); border-radius: 12px;
+      color: var(--ink); background: white; font-size: 22px;
+    }
+    .drawer-body { padding: 24px 26px 40px; overflow-y: auto; }
+    .drawer-foot {
+      margin-top: auto; padding: 16px 26px; border-top: 1px solid var(--line);
+      background: rgba(255,255,255,.94); display: flex; justify-content: flex-end; gap: 9px;
+    }
+    .drawer-section { margin-bottom: 26px; }
+    .drawer-section:last-child { margin-bottom: 0; }
+    .drawer-section-title {
+      margin-bottom: 12px; color: var(--burgundy-dark); font-size: 13px;
+      font-weight: 800; letter-spacing: .03em;
+    }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .detail {
+      min-height: 70px; padding: 12px; border: 1px solid var(--line); border-radius: 12px;
+      background: #fcf9f7;
+    }
+    .detail.wide { grid-column: 1 / -1; }
+    .detail span, .detail strong { display: block; }
+    .detail span { margin-bottom: 4px; color: var(--muted); font-size: 9px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .detail strong { font-size: 13px; }
+    .form-section {
+      padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: #fcfaf8;
+    }
+    .form-section + .form-section { margin-top: 12px; }
+    textarea.field { min-height: 90px; padding-top: 11px; resize: vertical; }
+    .switch-row {
+      padding: 12px 0; border-top: 1px solid var(--line); display: flex;
+      align-items: center; justify-content: space-between; gap: 20px;
+    }
+    .switch-row:first-child { border-top: 0; }
+    .switch-row strong, .switch-row small { display: block; }
+    .switch-row small { color: var(--muted); font-size: 10px; }
+    .switch {
+      width: 42px; height: 24px; padding: 3px; border: 0; border-radius: 999px;
+      background: #d9d0d1; transition: .2s ease;
+    }
+    .switch::after { content: ""; display: block; width: 18px; height: 18px; border-radius: 50%; background: white; box-shadow: 0 2px 5px rgba(0,0,0,.16); transition: .2s ease; }
+    .switch.on { background: var(--green); }
+    .switch.on::after { transform: translateX(18px); }
+    .layout-preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .layout-preview {
+      height: 150px; padding: 12px; border: 1px solid var(--line); border-radius: 13px;
+      background-color: white;
+      background-image: linear-gradient(rgba(105,27,44,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(105,27,44,.06) 1px, transparent 1px);
+      background-size: 18px 18px; position: relative; overflow: hidden;
+    }
+    .layout-preview i {
+      position: absolute; width: 27px; height: 27px; border: 2px solid var(--gold-dark);
+      border-radius: 50%; background: #fff7e8;
+    }
+    .layout-preview strong { position: absolute; left: 10px; bottom: 8px; color: var(--burgundy-dark); font-size: 10px; }
+    .upload-zone {
+      padding: 28px 18px; border: 1px dashed #cbb7bc; border-radius: 14px;
+      color: var(--muted); background: #fcfaf8; text-align: center;
+    }
+    .upload-zone b { display: block; margin-bottom: 4px; color: var(--burgundy); }
+    .notice {
+      padding: 12px 14px; border-left: 3px solid var(--gold); border-radius: 0 10px 10px 0;
+      color: var(--muted); background: #fbf5e9; font-size: 11px;
+    }
+    .feature-index { margin-top: 18px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+    .feature-index button {
+      min-height: 105px; padding: 14px; border: 1px solid var(--line); border-radius: 13px;
+      color: var(--ink); background: var(--surface); text-align: left;
+    }
+    .feature-index button:hover { border-color: var(--gold); box-shadow: var(--shadow); }
+    .feature-index b, .feature-index small { display: block; }
+    .feature-index b { margin: 14px 0 3px; color: var(--burgundy-dark); }
+    .feature-index small { color: var(--muted); font-size: 9px; }
+
+    @media (max-width: 1150px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .event-facts { grid-template-columns: repeat(3, 1fr); }
+      .module-grid { grid-template-columns: repeat(2, 1fr); }
+      .floor-grid { grid-template-columns: 190px minmax(0, 1fr); }
+      .planner-workspace { grid-template-columns: 185px 720px 225px; overflow: auto; }
+      .planner-event-strip { grid-template-columns: 1fr repeat(2,auto); }
+      .planner-event-stat:nth-last-child(-n+2) { display: none; }
+      .guest-panel { grid-column: 1 / -1; }
+      .guest-panel .guest-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 15px; }
+      .finance-grid, .ops-grid, .section-grid, .venue-grid { grid-template-columns: repeat(2, 1fr); }
+      .media-grid { grid-template-columns: repeat(3, 1fr); }
+      .feature-index { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 850px) {
+      .public-nav { height: 76px; }
+      .public-links { display: none; }
+      .public-links.open {
+        position: absolute; top: 76px; left: 14px; right: 14px; padding: 22px;
+        border-radius: 14px; display: grid; gap: 20px; color: var(--burgundy-dark);
+        background: white; box-shadow: var(--shadow);
+      }
+      .public-menu { display: grid; place-items: center; }
+      .public-hero { min-height: 720px; }
+      .public-hero-content { margin-left: 24px; }
+      .hero-proof, .hero-side-card { display: none; }
+      .public-intro { grid-template-columns: 1fr; }
+      .public-metrics { grid-template-columns: 1fr 1fr; }
+      .public-metric:nth-child(3) { border-left: 0; }
+      .process-grid { grid-template-columns: 1fr 1fr; }
+      .process-step:nth-child(3) { border-left: 0; border-top: 1px solid rgba(255,255,255,.14); }
+      .process-step:nth-child(4) { border-top: 1px solid rgba(255,255,255,.14); }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+      .service-grid { grid-template-columns: 1fr; }
+      .service-card { min-height: 230px; }
+      .about-band { grid-template-columns: 1fr; }
+      .about-image { min-height: 430px; }
+      .gallery-grid { grid-template-columns: 1fr; }
+      .gallery-shot { min-height: 360px; }
+      .public-cta { align-items: flex-start; flex-direction: column; }
+      .app { grid-template-columns: 1fr; }
+      .event-command-grid { grid-template-columns: 1fr; }
+      .sidebar { position: fixed; left: -260px; width: 250px; transition: .25s ease; box-shadow: var(--shadow); }
+      .sidebar.open { left: 0; }
+      .menu-toggle { display: inline-grid; place-items: center; }
+      .topbar { padding: 0 18px; }
+      .content { padding: 24px 18px 44px; }
+      .dashboard-grid, .ledger-grid, .split-grid, .client-hero { grid-template-columns: 1fr; }
+      .event-row { grid-template-columns: 52px 1fr auto; }
+      .event-row > :nth-child(3), .event-row > :nth-child(4) { display: none; }
+      .floor-grid { display: block; overflow-x: auto; }
+      .palette, .guest-panel { display: none; }
+      .floor { min-width: 650px; }
+      .planner-workspace { display: block; height: 710px; overflow: auto; }
+      .planner-library, .planner-inspector { display: none; }
+      .planner-stage-wrap { width: 900px; height: 690px; }
+      .drawer { width: min(560px, 100%); }
+    }
+    @media (max-width: 560px) {
+      .public-hero h1 { font-size: 46px; }
+      .public-hero p { font-size: 14px; }
+      .public-kicker { letter-spacing: .13em; }
+      .hero-actions { align-items: stretch; flex-direction: column; }
+      .hero-actions .btn { width: 100%; }
+      .about-copy { padding: 55px 24px; }
+      .public-cta { margin: 0 0 50px; }
+      .public-footer { align-items: flex-start; flex-direction: column; }
+      .public-metrics { grid-template-columns: 1fr; }
+      .public-metric, .public-metric:nth-child(3) { border-left: 0; border-top: 1px solid var(--line); }
+      .public-metric:first-child { border-top: 0; }
+      .process-grid, .footer-grid { grid-template-columns: 1fr; }
+      .process-step, .process-step:nth-child(3), .process-step:nth-child(4) { border-left: 0; border-top: 1px solid rgba(255,255,255,.14); }
+      .process-step:first-child { border-top: 0; }
+      .footer-bottom { align-items: flex-start; flex-direction: column; }
+      .topbar .btn span { display: none; }
+      .topbar .btn b { display: inline; }
+      .search { flex: 1; width: auto; }
+      .page-head { align-items: flex-start; flex-direction: column; }
+      .event-command-top { flex-direction: column; }
+      .event-facts { grid-template-columns: repeat(2, 1fr); }
+      .module-grid { grid-template-columns: 1fr; }
+      h1 { font-size: 29px; }
+      .stats, .finance-grid, .ops-grid, .section-grid, .venue-grid, .media-grid { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      label.full { grid-column: auto; }
+      .detail-grid, .layout-preview-grid { grid-template-columns: 1fr; }
+      .detail.wide { grid-column: auto; }
+      .feature-index { grid-template-columns: 1fr 1fr; }
+      .planner-event-strip { grid-template-columns: 1fr; }
+      .planner-event-stat { display: none; }
+      .planner-toolbar .tool-btn span { display: none; }
+      .save-state { width: 100%; margin: 5px 0 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="public-site" id="publicSite">
+    <nav class="public-nav" aria-label="Navigation du site public">
+      <a class="public-logo" href="#accueil"><span class="public-logo-mark">C</span><span>Celebrons<small>Protocole & événements</small></span></a>
+      <div class="public-links">
+        <a href="#accueil">Accueil</a>
+        <a href="#services">Services</a>
+        <a href="#salles">Salles</a>
+        <a href="#apropos">À propos</a>
+        <a href="#realisations">Réalisations</a>
+        <a href="#contact">Contact</a>
+        <a class="portal-link" href="#" data-login>Connexion portail ↗</a>
+      </div>
+      <button class="icon-btn public-menu" id="publicMenuToggle" aria-label="Ouvrir le menu">☰</button>
+    </nav>
+
+    <header class="public-hero" id="accueil">
+      <div class="public-hero-content">
+        <p class="public-kicker">L'excellence événementielle · Goma, RDC</p>
+        <h1>L’art de recevoir.<br><em>La précision d’organiser.</em></h1>
+        <p>Celebrons imagine, coordonne et sublime vos événements. Une équipe exigeante, une attention sincère et une maîtrise complète de chaque détail.</p>
+        <div class="hero-actions">
+          <a class="btn gold" href="#contact">Confiez-nous votre événement →</a>
+          <a class="btn ghost" href="#realisations">Explorer nos réalisations</a>
+        </div>
+        <div class="hero-tagline"><span>Mariages</span><span>Galas</span><span>Conférences</span><span>Célébrations privées</span></div>
+      </div>
+      <aside class="hero-side-card">
+        <span>Pourquoi Celebrons</span>
+        <h3>Vous profitez.<br>Nous orchestrons.</h3>
+        <div class="hero-side-item"><i>01</i><div><strong>Une équipe dédiée</strong><small>Un responsable unique à vos côtés</small></div></div>
+        <div class="hero-side-item"><i>02</i><div><strong>Tout au même endroit</strong><small>Invités, salle, équipe et logistique</small></div></div>
+        <div class="hero-side-item"><i>03</i><div><strong>Une exécution maîtrisée</strong><small>Du premier échange au jour J</small></div></div>
+      </aside>
+      <div class="hero-proof">
+        <div><strong>150+</strong><span>Événements accompagnés</span></div>
+        <div><strong>Goma</strong><span>Nord-Kivu, RDC</span></div>
+        <div><strong>360°</strong><span>Coordination complète</span></div>
+      </div>
+    </header>
+
+    <section class="public-intro">
+      <div><p class="eyebrow">Celebrons, plus qu'un service</p><h2>Nous créons l’espace où vos invités se sentent <em>attendus.</em></h2></div>
+      <div class="intro-copy"><p>Votre événement raconte une histoire. Notre rôle est de lui donner un rythme, une présence et une exécution irréprochable—sans que vous ayez à porter la complexité de l’organisation.</p><a class="intro-link" href="#apropos">Découvrir notre approche <span>→</span></a></div>
+    </section>
+    <section class="public-metrics" aria-label="Chiffres clés Celebrons">
+      <div class="public-metric"><strong>150+</strong><span>Événements accompagnés</span></div>
+      <div class="public-metric"><strong>12k+</strong><span>Invités accueillis</span></div>
+      <div class="public-metric"><strong>6</strong><span>Salles partenaires</span></div>
+      <div class="public-metric"><strong>360°</strong><span>Coordination complète</span></div>
+    </section>
+
+    <section class="public-section" id="services">
+      <div class="public-section-head">
+        <p class="eyebrow">Notre savoir-faire</p>
+        <h2>Une présence élégante.<br>Une organisation sans faille.</h2>
+        <p class="subtle">Celebrons réunit les personnes, les partenaires et la logistique nécessaires pour donner vie à votre vision.</p>
+      </div>
+      <div class="service-grid">
+        <article class="service-card"><span class="service-icon">♙</span><span class="service-number">01</span><h3>Protocole & accueil</h3><p>Une présence élégante et attentive pour accueillir, orienter et accompagner chaque invité.</p><a href="#contact">En savoir plus →</a></article>
+        <article class="service-card"><span class="service-icon">◇</span><span class="service-number">02</span><h3>Coordination événementielle</h3><p>Un pilotage central de la salle, du planning, des équipes et de tous vos partenaires.</p><a href="#contact">En savoir plus →</a></article>
+        <article class="service-card"><span class="service-icon">☷</span><span class="service-number">03</span><h3>Traiteur & service</h3><p>Une expérience culinaire soignée, servie avec précision et adaptée à vos invités.</p><a href="#contact">En savoir plus →</a></article>
+      </div>
+    </section>
+
+    <section class="public-section" id="salles" style="background:#fbf7f5">
+      <div class="public-section-head">
+        <p class="eyebrow">Des lieux à la hauteur</p>
+        <h2>Trouvez le cadre idéal pour recevoir vos invités.</h2>
+        <p class="subtle">Comparez les capacités, configurations et services. Notre équipe vérifie la disponibilité et adapte la mise en place à votre événement.</p>
+      </div>
+      <div class="venue-grid">
+        <article class="venue-card"><div class="venue-image" style="background-image:url('../Celebrons%20V1%20HTML/images/bg/10.JPG')"><span class="badge green">Jusqu'à 350 invités</span></div><div class="venue-body"><h3>La Joie Plaza</h3><p class="subtle">Salle intérieure · cuisine · Goma</p><button class="btn ghost small" data-action="Fiche La Joie Plaza ouverte">Découvrir la salle</button></div></article>
+        <article class="venue-card"><div class="venue-image" style="background-image:url('../Celebrons%20V1%20HTML/images/bg/16.JPG')"><span class="badge blue">Jusqu'à 220 invités</span></div><div class="venue-body"><h3>Hôtel Serena</h3><p class="subtle">Salle intérieure · vue lac · Goma</p><button class="btn ghost small" data-action="Fiche Hôtel Serena ouverte">Découvrir la salle</button></div></article>
+        <article class="venue-card"><div class="venue-image" style="background-image:url('../Celebrons%20V1%20HTML/images/bg/20.JPG')"><span class="badge amber">Jusqu'à 140 invités</span></div><div class="venue-body"><h3>Villa Kivu</h3><p class="subtle">Espace extérieur · jardin · Goma</p><button class="btn ghost small" data-action="Fiche Villa Kivu ouverte">Découvrir la salle</button></div></article>
+      </div>
+    </section>
+
+    <section class="about-band" id="apropos">
+      <div class="about-image" role="img" aria-label="Équipe Celebrons lors d’un événement"></div>
+      <div class="about-copy">
+        <p class="public-kicker">À propos de Celebrons</p>
+        <h2>Votre sérénité fait partie de l’événement.</h2>
+        <p>Basée à Goma, Celebrons accompagne les familles, entreprises et organisations avec une équipe dynamique, formée et attentive. Notre mission est simple : vous permettre de vivre pleinement votre événement pendant que nous veillons à son bon déroulement.</p>
+        <a class="btn" href="#contact">Parler à notre équipe</a>
+      </div>
+    </section>
+
+    <section class="process-section">
+      <div class="process-head"><p class="public-kicker">Notre méthode</p><h2>Un parcours clair. Une sérénité totale.</h2><p>Chaque événement avance avec des décisions visibles, un responsable identifié et une équipe parfaitement alignée.</p></div>
+      <div class="process-grid">
+        <article class="process-step"><span>01</span><h3>Nous vous écoutons</h3><p>Vision, invités, budget et priorités : nous commençons par comprendre ce qui compte vraiment.</p></article>
+        <article class="process-step"><span>02</span><h3>Nous concevons</h3><p>Salle, services, plan de table, menu et partenaires prennent forme dans une proposition cohérente.</p></article>
+        <article class="process-step"><span>03</span><h3>Nous coordonnons</h3><p>Votre portail vous donne une visibilité claire pendant que notre équipe pilote toute la préparation.</p></article>
+        <article class="process-step"><span>04</span><h3>Vous célébrez</h3><p>Le jour J, chaque personne sait quoi faire. Vous êtes pleinement présent avec vos invités.</p></article>
+      </div>
+    </section>
+
+    <section class="public-section public-gallery" id="realisations">
+      <div class="public-section-head">
+        <p class="eyebrow">Moments signés Celebrons</p>
+        <h2>Des souvenirs qui continuent de vivre.</h2>
+      </div>
+      <div class="gallery-grid">
+        <article class="gallery-shot"><div><h3>Mariages</h3><span>Accueil · Mise en place · Service</span></div></article>
+        <article class="gallery-shot"><div><h3>Galas & conférences</h3><span>Protocole · Coordination</span></div></article>
+        <article class="gallery-shot"><div><h3>Célébrations privées</h3><span>Expérience sur mesure</span></div></article>
+      </div>
+    </section>
+
+    <section class="testimonial-band">
+      <p class="eyebrow">La parole à nos clients</p>
+      <blockquote>« Nous avons vécu notre mariage sans stress. L’équipe Celebrons était partout, sans jamais prendre la place du moment. »</blockquote>
+      <cite>Sarah & Joël · Mariage à Goma</cite>
+    </section>
+
+    <section class="public-cta" id="contact">
+      <div><p class="public-kicker">Votre prochain événement</p><h2>Construisons ensemble un moment qui vous ressemble.</h2></div>
+      <button class="btn" data-open-quote>Demander un devis →</button>
+    </section>
+
+    <footer class="public-footer-rich">
+      <div class="footer-grid">
+        <div class="footer-brand"><strong>Celebrons.</strong><p>Agence événementielle à Goma. Nous créons des expériences accueillantes, élégantes et parfaitement coordonnées.</p></div>
+        <div class="footer-col"><b>Découvrir</b><a href="#services">Services</a><a href="#salles">Salles</a><a href="#realisations">Réalisations</a></div>
+        <div class="footer-col"><b>Nous contacter</b><span>+243 990 413 132</span><span>contact@celebrons.org</span><span>Goma, Nord-Kivu</span></div>
+        <div class="footer-col"><b>Espace sécurisé</b><span>Vous organisez déjà un événement avec nous ?</span><button class="btn ghost small" data-login>Accéder au portail</button></div>
+      </div>
+      <div class="footer-bottom"><span>© 2026 Celebrons. Tous droits réservés.</span><span>Instagram · Facebook · Confidentialité</span></div>
+    </footer>
+  </div>
+
+  <div class="app" id="portalApp" hidden>
+    <aside class="sidebar" id="sidebar">
+      <div class="brand"><span class="brand-mark">C</span> Celebrons</div>
+      <div class="nav-label">Espace de travail</div>
+      <nav class="nav" aria-label="Navigation principale">
+        <button class="active" data-view="dashboard"><span class="nav-icon">⌂</span> Tableau de bord</button>
+        <button data-view="events"><span class="nav-icon">◇</span> Événements <span class="nav-count">8</span></button>
+        <button data-view="invitations"><span class="nav-icon">✉</span> Invitations</button>
+        <button data-view="floorplan"><span class="nav-icon">▦</span> Plan de salle</button>
+        <button data-view="gallery"><span class="nav-icon">▧</span> Galerie & menu</button>
+        <button data-view="logistics"><span class="nav-icon">□</span> Logistique</button>
+        <button data-view="personnel"><span class="nav-icon">♙</span> Personnel</button>
+        <button data-view="finance"><span class="nav-icon">◉</span> Finances</button>
+        <button data-view="reports"><span class="nav-icon">↗</span> Rapports</button>
+      </nav>
+      <div class="nav-label" style="margin-top:24px">Configuration</div>
+      <nav class="nav">
+        <button data-view="catalog"><span class="nav-icon">☷</span> Référentiels</button>
+        <button data-view="users"><span class="nav-icon">⚙</span> Utilisateurs & accès</button>
+        <button data-view="client"><span class="nav-icon">◎</span> Aperçu client</button>
+        <button data-public-return><span class="nav-icon">↙</span> Site public</button>
+      </nav>
+      <div class="sidebar-foot">
+        <div class="avatar">JC</div>
+        <div class="profile-meta"><strong>John Chishugi</strong><small>Administrateur</small></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="icon-btn menu-toggle" id="menuToggle" aria-label="Ouvrir le menu">☰</button>
+        <label class="search">
+          <span aria-hidden="true">⌕</span>
+          <span class="sr-only">Rechercher</span>
+          <input id="globalSearch" type="search" placeholder="Rechercher un événement, invité…">
+        </label>
+        <div class="top-actions">
+          <button class="icon-btn" data-demo="Centre de notifications" aria-label="Notifications">♢<span class="dot"></span></button>
+          <button class="btn gold" data-open-event><span>＋ Nouvel événement</span><b aria-hidden="true">＋</b></button>
+        </div>
+      </header>
+
+      <div class="content">
+        <section class="view active" id="view-dashboard">
+          <div class="page-head">
+            <div>
+              <p class="eyebrow">Vendredi 17 juillet 2026</p>
+              <h1>Bonjour, John.</h1>
+              <p class="subtle">Voici ce qui demande votre attention aujourd’hui.</p>
+            </div>
+            <button class="btn ghost" data-demo="Export du tableau de bord">↓ Exporter</button>
+          </div>
+
+          <div class="stats">
+            <article class="stat">
+              <div class="stat-top"><span>Événements actifs</span><span class="stat-icon">◇</span></div>
+              <div class="stat-value">12</div><span class="trend">↑ 3 ce mois</span>
+            </article>
+            <article class="stat">
+              <div class="stat-top"><span>Invités attendus</span><span class="stat-icon">♙</span></div>
+              <div class="stat-value">1 846</div><span class="trend">82% ont répondu</span>
+            </article>
+            <article class="stat">
+              <div class="stat-top"><span>Solde à recevoir</span><span class="stat-icon">◉</span></div>
+              <div class="stat-value">$8 450</div><span class="trend">4 échéances ouvertes</span>
+            </article>
+            <article class="stat">
+              <div class="stat-top"><span>Taux de préparation</span><span class="stat-icon">✓</span></div>
+              <div class="stat-value">76%</div><span class="trend">↑ 8% cette semaine</span>
+            </article>
+          </div>
+
+          <div class="dashboard-grid">
+            <article class="card">
+              <div class="card-head">
+                <div><h2>Prochains événements</h2><p class="subtle">Les cinq événements les plus proches</p></div>
+                <button class="btn ghost small" data-view-jump="events">Tout voir</button>
+              </div>
+              <div class="event-list">
+                <div class="event-row">
+                  <div class="date-box"><strong>25</strong><span>Juil</span></div>
+                  <div class="event-title"><strong>Mariage Sarah & Joël</strong><small>La Joie Plaza · 320 invités</small></div>
+                  <div class="people"><span class="mini-avatar">AM</span><span class="mini-avatar">JK</span><span class="mini-avatar">+8</span></div>
+                  <span class="badge green">Planification</span><button class="btn ghost small" data-open-primary-event>Ouvrir</button>
+                </div>
+                <div class="event-row">
+                  <div class="date-box"><strong>02</strong><span>Août</span></div>
+                  <div class="event-title"><strong>Gala Fondation Tumaini</strong><small>Hôtel Serena · 180 invités</small></div>
+                  <div class="people"><span class="mini-avatar">BN</span><span class="mini-avatar">+5</span></div>
+                  <span class="badge amber">À confirmer</span><button class="btn ghost small" data-demo="Gala Fondation Tumaini">Ouvrir</button>
+                </div>
+                <div class="event-row">
+                  <div class="date-box"><strong>09</strong><span>Août</span></div>
+                  <div class="event-title"><strong>Anniversaire Grâce — 30 ans</strong><small>Villa Kivu · 90 invités</small></div>
+                  <div class="people"><span class="mini-avatar">JM</span><span class="mini-avatar">+3</span></div>
+                  <span class="badge blue">Confirmé</span><button class="btn ghost small" data-demo="Anniversaire Grâce">Ouvrir</button>
+                </div>
+                <div class="event-row">
+                  <div class="date-box"><strong>16</strong><span>Août</span></div>
+                  <div class="event-title"><strong>Conférence Entreprendre</strong><small>Cap Kivu · 450 invités</small></div>
+                  <div class="people"><span class="mini-avatar">AK</span><span class="mini-avatar">+12</span></div>
+                  <span class="badge green">Planification</span><button class="btn ghost small" data-demo="Conférence Entreprendre">Ouvrir</button>
+                </div>
+              </div>
+            </article>
+
+            <aside>
+              <article class="card">
+                <div class="card-head"><div><h3>Juillet 2026</h3><p class="subtle">6 événements</p></div><button class="icon-btn" data-demo="Calendrier complet">›</button></div>
+                <div class="calendar-head"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+                <div class="calendar" id="calendar"></div>
+              </article>
+              <article class="card readiness">
+                <div class="card-head"><div><h3>Mariage Sarah & Joël</h3><p class="subtle">Préparation générale</p></div><strong>78%</strong></div>
+                <div class="readiness-row"><div class="progress-label"><span>Invitations</span><span>92%</span></div><div class="progress"><span style="width:92%"></span></div></div>
+                <div class="readiness-row"><div class="progress-label"><span>Plan de salle</span><span>74%</span></div><div class="progress"><span style="width:74%"></span></div></div>
+                <div class="readiness-row"><div class="progress-label"><span>Logistique</span><span>66%</span></div><div class="progress"><span style="width:66%"></span></div></div>
+              </article>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="view-events">
+          <div class="page-head">
+            <div><p class="eyebrow">Gestion commerciale & opérations</p><h1>Événements</h1><p class="subtle">De la négociation jusqu’au rapport final.</p></div>
+            <button class="btn gold" data-open-event>＋ Créer un événement</button>
+          </div>
+          <div class="toolbar">
+            <input class="field" type="search" placeholder="Rechercher…">
+            <select class="field"><option>Tous les statuts</option><option>Négociation</option><option>Confirmé</option><option>Planification</option><option>Terminé</option></select>
+            <select class="field"><option>Tous les types</option><option>Mariage</option><option>Gala</option><option>Conférence</option><option>Anniversaire</option></select>
+            <button class="btn ghost" data-demo="Filtres avancés">☷ Filtres</button>
+          </div>
+          <article class="card table-card">
+            <table>
+              <thead><tr><th>Événement</th><th>Date & lieu</th><th>Invités</th><th>Responsable</th><th>Statut</th><th>Préparation</th><th></th></tr></thead>
+              <tbody>
+                <tr><td><strong>Mariage Sarah & Joël</strong><small>EVT-2026-042 · Mariage</small></td><td><strong>25 juil. 2026</strong><small>La Joie Plaza</small></td><td>320</td><td>Amina M.</td><td><span class="badge green">Planification</span></td><td><strong>78%</strong><small>6 tâches ouvertes</small></td><td><button class="btn ghost small" data-open-primary-event>Ouvrir</button></td></tr>
+                <tr><td><strong>Gala Fondation Tumaini</strong><small>EVT-2026-043 · Gala</small></td><td><strong>02 août 2026</strong><small>Hôtel Serena</small></td><td>180</td><td>Bénédicte N.</td><td><span class="badge amber">Négociation</span></td><td><strong>24%</strong><small>Accord attendu</small></td><td><button class="btn ghost small" data-demo="Fiche événement">Ouvrir</button></td></tr>
+                <tr><td><strong>Anniversaire Grâce — 30 ans</strong><small>EVT-2026-044 · Anniversaire</small></td><td><strong>09 août 2026</strong><small>Villa Kivu</small></td><td>90</td><td>Jean M.</td><td><span class="badge blue">Confirmé</span></td><td><strong>Prêt à lancer</strong><small>Données complètes</small></td><td><button class="btn gold small" data-open-launch>Lancer</button></td></tr>
+                <tr><td><strong>Conférence Entreprendre</strong><small>EVT-2026-045 · Conférence</small></td><td><strong>16 août 2026</strong><small>Cap Kivu</small></td><td>450</td><td>Aline K.</td><td><span class="badge green">Planification</span></td><td><strong>62%</strong><small>8 tâches ouvertes</small></td><td><button class="btn ghost small" data-demo="Fiche événement">Ouvrir</button></td></tr>
+                <tr><td><strong>Mariage Lydia & Patrick</strong><small>EVT-2026-038 · Mariage</small></td><td><strong>11 juil. 2026</strong><small>Salle Virunga</small></td><td>250</td><td>Amina M.</td><td><span class="badge blue">Terminé</span></td><td><strong>100%</strong><small>Rapport disponible</small></td><td><button class="btn ghost small" data-demo="Rapport final">Rapport</button></td></tr>
+              </tbody>
+            </table>
+          </article>
+        </section>
+
+        <section class="view" id="view-event">
+          <div class="toolbar">
+            <button class="btn ghost small" data-view-jump="events">← Retour aux événements</button>
+            <span class="subtle">EVT-2026-042</span>
+          </div>
+          <header class="event-command-head">
+            <div class="event-command-top">
+              <div>
+                <p class="eyebrow">Espace événement lancé</p>
+                <h1 id="activeEventTitle">Mariage Sarah & Joël</h1>
+                <p>Un espace dédié rassemble toutes les décisions, équipes et opérations de cet événement.</p>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <span class="badge">Planification · actif</span>
+                <button class="btn ghost small" data-demo="Actions de l’événement">•••</button>
+              </div>
+            </div>
+            <div class="event-facts">
+              <div><span>Date & heure</span><strong id="activeEventDate">25 juillet 2026 · 14:00</strong></div>
+              <div><span>Salle</span><strong id="activeEventVenue">La Joie Plaza, Goma</strong></div>
+              <div><span>Clients</span><strong id="activeEventClients">Sarah M. & Joël K.</strong></div>
+              <div><span>Invités</span><strong id="activeEventGuests">287 / 320 enregistrés</strong></div>
+              <div><span>Responsable</span><strong id="activeEventManager">Amina Mbuyi</strong></div>
+            </div>
+          </header>
+
+          <div class="workspace-tabs">
+            <button class="active">Vue d’ensemble</button>
+            <button data-feature="event-details">Détails</button>
+            <button data-view-jump="invitations">Invités & invitations</button>
+            <button data-view-jump="floorplan">Plan de salle</button>
+            <button data-view-jump="logistics">Logistique</button>
+            <button data-view-jump="personnel">Personnel</button>
+            <button data-view-jump="finance">Finances</button>
+            <button data-view-jump="reports">Rapports</button>
+          </div>
+
+          <div class="stats">
+            <article class="stat"><div class="stat-top"><span>Préparation globale</span><span class="stat-icon">✓</span></div><div class="stat-value">78%</div><span class="trend">8% de plus cette semaine</span></article>
+            <article class="stat"><div class="stat-top"><span>Jours restants</span><span class="stat-icon">◷</span></div><div class="stat-value">8</div><span class="subtle">Événement le 25 juillet</span></article>
+            <article class="stat"><div class="stat-top"><span>Tâches ouvertes</span><span class="stat-icon">☷</span></div><div class="stat-value">14</div><span style="color:var(--red);font-size:11px">3 en retard</span></article>
+            <article class="stat"><div class="stat-top"><span>Solde client</span><span class="stat-icon">◉</span></div><div class="stat-value">$4 500</div><span class="subtle">Échéance le 20 juillet</span></article>
+          </div>
+
+          <div class="event-command-grid">
+            <div>
+              <div class="card-head"><div><h2>Centre de préparation</h2><p class="subtle">Accédez directement à chaque domaine de l’événement</p></div></div>
+              <div class="module-grid">
+                <button class="event-module" data-feature="event-details">
+                  <span class="event-module-top"><span class="ops-icon">◇</span><span class="badge green">Complet</span></span>
+                  <h3>Détails & contacts</h3><p class="subtle">Contrat, clients, famille, salle et horaires</p>
+                  <span class="event-module-progress">Voir la fiche complète →</span>
+                </button>
+                <button class="event-module" data-view-jump="invitations">
+                  <span class="event-module-top"><span class="ops-icon">✉</span><strong>82%</strong></span>
+                  <h3>Invités & invitations</h3><p class="subtle">235 confirmés · 41 en attente</p>
+                  <span class="event-module-progress">287 personnes enregistrées →</span>
+                </button>
+                <button class="event-module" data-view-jump="floorplan">
+                  <span class="event-module-top"><span class="ops-icon">▦</span><strong>68%</strong></span>
+                  <h3>Plan de salle</h3><p class="subtle">194 places assignées · 3 conflits</p>
+                  <span class="event-module-progress">Version 8 en brouillon →</span>
+                </button>
+                <button class="event-module" data-view-jump="logistics">
+                  <span class="event-module-top"><span class="ops-icon">□</span><strong>66%</strong></span>
+                  <h3>Logistique</h3><p class="subtle">Matériel, boissons et cadeaux</p>
+                  <span class="event-module-progress">24 / 36 tâches terminées →</span>
+                </button>
+                <button class="event-module" data-view-jump="personnel">
+                  <span class="event-module-top"><span class="ops-icon">♙</span><strong>18</strong></span>
+                  <h3>Personnel & partenaires</h3><p class="subtle">Protocoles, photographe, MC, cuisine</p>
+                  <span class="event-module-progress">3 rôles à compléter →</span>
+                </button>
+                <button class="event-module" data-view-jump="gallery">
+                  <span class="event-module-top"><span class="ops-icon">▧</span><strong>42</strong></span>
+                  <h3>Galerie & menu</h3><p class="subtle">Photos civiles, menu et boissons</p>
+                  <span class="event-module-progress">Menu approuvé par le client →</span>
+                </button>
+                <button class="event-module" data-view-jump="finance">
+                  <span class="event-module-top"><span class="ops-icon">◉</span><strong>64%</strong></span>
+                  <h3>Finances</h3><p class="subtle">$8 000 reçus sur $12 500</p>
+                  <span class="event-module-progress">Voir paiements et dépenses →</span>
+                </button>
+                <button class="event-module" data-view-jump="reports">
+                  <span class="event-module-top"><span class="ops-icon">↗</span><strong>78%</strong></span>
+                  <h3>Rapports & clôture</h3><p class="subtle">Performance, écarts et bilan final</p>
+                  <span class="event-module-progress">8 sections de clôture →</span>
+                </button>
+              </div>
+            </div>
+            <aside>
+              <article class="card">
+                <div class="card-head"><div><h3>Prochaines actions</h3><p class="subtle">Priorités de l’équipe</p></div><button class="btn ghost small" data-demo="Toutes les tâches">Tout voir</button></div>
+                <div class="timeline">
+                  <div class="timeline-item"><strong>Confirmer la sonorisation</strong><small>Aujourd’hui · Amina M.</small></div>
+                  <div class="timeline-item"><strong>Relancer 41 invitations</strong><small>18 juillet · Équipe accueil</small></div>
+                  <div class="timeline-item"><strong>Recevoir la troisième tranche</strong><small>20 juillet · Finance</small></div>
+                  <div class="timeline-item"><strong>Briefing général</strong><small>24 juillet · Toute l’équipe</small></div>
+                </div>
+              </article>
+              <article class="card" style="margin-top:14px">
+                <div class="card-head"><div><h3>Accès client</h3><p class="subtle">Sarah et Joël peuvent consulter leur portail</p></div><span class="badge green">Actif</span></div>
+                <button class="btn ghost small" style="width:100%" data-view-jump="client">Voir comme le client</button>
+              </article>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="view-invitations">
+          <div class="page-head">
+            <div><p class="eyebrow">Mariage Sarah & Joël</p><h1>Invitations & invités</h1><p class="subtle">320 places prévues · 287 personnes enregistrées</p></div>
+            <button class="btn gold" data-open-invitation>＋ Créer un lot</button>
+          </div>
+          <div class="workspace-tabs">
+            <button class="active">Liste des invités</button><button>Lots d’invitations</button><button>Réponses RSVP</button><button>Check-in</button>
+          </div>
+          <div class="stats">
+            <article class="stat"><div class="stat-top"><span>Invités</span><span class="stat-icon">♙</span></div><div class="stat-value">287</div><span class="subtle">sur 320 places</span></article>
+            <article class="stat"><div class="stat-top"><span>Confirmés</span><span class="stat-icon">✓</span></div><div class="stat-value">235</div><span class="trend">82% de réponses</span></article>
+            <article class="stat"><div class="stat-top"><span>En attente</span><span class="stat-icon">…</span></div><div class="stat-value">41</div><span class="subtle">relance recommandée</span></article>
+            <article class="stat"><div class="stat-top"><span>Places assignées</span><span class="stat-icon">▦</span></div><div class="stat-value">194</div><span class="subtle">68% du plan</span></article>
+          </div>
+          <div class="toolbar">
+            <input class="field" type="search" placeholder="Nom, téléphone ou code…">
+            <select class="field"><option>Toutes les réponses</option><option>Confirmé</option><option>En attente</option><option>Décliné</option></select>
+            <select class="field"><option>Toutes les tables</option><option>Assignés</option><option>Non assignés</option></select>
+            <button class="btn ghost" data-demo="Importer un fichier Excel">↑ Importer</button>
+            <button class="btn ghost" data-demo="Exporter les invitations">↓ Exporter</button>
+            <button class="btn gold" data-action="Scanner QR activé · prêt pour le check-in">⌗ Scanner QR</button>
+          </div>
+          <article class="card table-card">
+            <table>
+              <thead><tr><th>Invité / groupe</th><th>Code</th><th>Catégorie</th><th>Réponse</th><th>Table</th><th>Format</th><th></th></tr></thead>
+              <tbody>
+                <tr><td><strong>Famille Bahati</strong><small>4 personnes · 4 confirmées</small></td><td>BAHATI-X7K2</td><td>Personnalisée</td><td><span class="badge green">Confirmé</span></td><td>Table 04</td><td>QR + imprimée</td><td><button class="btn ghost small" data-demo="Invitation Bahati">Voir</button></td></tr>
+                <tr><td><strong>Aline & Patrick</strong><small>2 personnes · 2 confirmées</small></td><td>ALI-PAT-9M4</td><td>Couple</td><td><span class="badge green">Confirmé</span></td><td>Table 07</td><td>QR</td><td><button class="btn ghost small" data-demo="Invitation Aline & Patrick">Voir</button></td></tr>
+                <tr><td><strong>Jean-Pierre M.</strong><small>1 personne</small></td><td>JPM-4N8C</td><td>Single</td><td><span class="badge amber">En attente</span></td><td>Non assigné</td><td>Imprimée</td><td><button class="btn ghost small" data-demo="Invitation Jean-Pierre">Voir</button></td></tr>
+                <tr><td><strong>Famille Kalume</strong><small>6 personnes · 5 confirmées</small></td><td>KALUME-P2Q8</td><td>Personnalisée</td><td><span class="badge blue">Partiel</span></td><td>Table 12</td><td>QR + imprimée</td><td><button class="btn ghost small" data-demo="Invitation Kalume">Voir</button></td></tr>
+              </tbody>
+            </table>
+          </article>
+        </section>
+
+        <section class="view" id="view-floorplan">
+          <div class="page-head">
+            <div><p class="eyebrow">Mariage Sarah & Joël · La Joie Plaza</p><h1>Éditeur de maquette</h1><p class="subtle">Construisez la salle, assignez les groupes et publiez le plan destiné aux invités.</p></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" data-demo="Historique des plans">Historique</button><button class="btn ghost" data-demo="Aperçu imprimable">Aperçu invité</button><button class="btn gold" id="publishPlan">Publier le plan</button></div>
+          </div>
+
+          <div class="planner-event-strip">
+            <div class="planner-event-title"><span>Plan de salle · Version 8</span><strong>Sarah & Joël — Salle La Joie</strong></div>
+            <div class="planner-event-stat"><strong>24</strong><span>Tables rondes</span></div>
+            <div class="planner-event-stat"><strong>4</strong><span>Rectangulaires</span></div>
+            <div class="planner-event-stat"><strong>287</strong><span>Invités</span></div>
+            <div class="planner-event-stat"><strong>6</strong><span>Groupes</span></div>
+          </div>
+
+          <div class="group-filters">
+            <span>Afficher :</span>
+            <button class="group-filter active" data-group-filter="all">Tous</button>
+            <button class="group-filter" data-group-filter="group-a">A — Famille & Église</button>
+            <button class="group-filter" data-group-filter="group-b">B — Belle famille</button>
+            <button class="group-filter" data-group-filter="group-c">C — Invités</button>
+            <button class="group-filter" data-group-filter="group-d">D — Connaissances</button>
+            <button class="group-filter" data-group-filter="group-e">E — Amis maison</button>
+          </div>
+
+          <div class="planner-toolbar">
+            <button class="tool-btn active" data-planner-action="select">↖ <span>Sélection</span></button>
+            <button class="tool-btn" data-planner-action="pan">✥ <span>Déplacer</span></button>
+            <span class="tool-divider"></span>
+            <button class="tool-btn" data-planner-action="undo">↶ <span>Annuler</span></button>
+            <button class="tool-btn" data-planner-action="redo">↷ <span>Rétablir</span></button>
+            <span class="tool-divider"></span>
+            <button class="tool-btn" data-planner-action="align">≡ <span>Aligner</span></button>
+            <button class="tool-btn" data-planner-action="duplicate">⧉ <span>Dupliquer</span></button>
+            <button class="tool-btn" data-planner-action="grid"># <span>Grille</span></button>
+            <span class="save-state">✓ Sauvegarde automatique · à l'instant</span>
+          </div>
+
+          <div class="planner-workspace">
+            <aside class="planner-library">
+              <div class="planner-panel-head"><h3>Bibliothèque</h3><p>Ajoutez un élément à la maquette</p></div>
+              <div class="library-label">Tables</div>
+              <button class="library-item" data-add-object="round"><span class="library-shape"></span><span><strong>Table ronde</strong><small>6 à 10 places</small></span></button>
+              <button class="library-item" data-add-object="rectangle"><span class="library-shape rectangle"></span><span><strong>Table rectangulaire</strong><small>8 à 14 places</small></span></button>
+              <div class="library-label">Zones de salle</div>
+              <button class="library-item" data-add-object="stage"><span class="library-shape zone"></span><span><strong>Estrade</strong><small>Scène principale</small></span></button>
+              <button class="library-item" data-add-object="dance"><span class="library-shape zone" style="background:#a8d93d"></span><span><strong>Piste de danse</strong><small>Zone libre</small></span></button>
+              <button class="library-item" data-add-object="buffet"><span class="library-shape zone" style="background:#8b6a32"></span><span><strong>Buffet / service</strong><small>Repas et boissons</small></span></button>
+              <button class="library-item" data-add-object="door"><span class="library-shape zone" style="background:#7a2335"></span><span><strong>Porte / entrée</strong><small>Accès invités</small></span></button>
+              <div class="library-label">Maquettes</div>
+              <button class="library-item" data-feature="layout-templates"><span class="library-shape rectangle" style="border-style:dashed"></span><span><strong>Changer de modèle</strong><small>Classique ou banquet</small></span></button>
+            </aside>
+
+            <div class="planner-stage-wrap">
+              <div class="planner-canvas" id="floor">
+                <div class="plan-zone stage-zone draggable-plan">Estrade</div>
+                <div class="plan-zone aisle-zone draggable-plan">Couloir</div>
+                <div class="plan-zone buffet-zone draggable-plan">Buffet & boissons</div>
+                <div class="plan-zone dance-zone draggable-plan"></div>
+                <div class="plan-zone door-zone draggable-plan">Entrée</div>
+
+                <div class="floor-table plan-table group-a selected" data-seats="8 / 10 places" style="left:95px;top:108px">A1<span class="chair c1"></span><span class="chair c2"></span><span class="chair c3"></span><span class="chair c4"></span><span class="chair c5"></span><span class="chair c6"></span></div>
+                <div class="floor-table plan-table group-a" data-seats="10 / 10 places" style="left:95px;top:190px">A2<span class="chair c1"></span><span class="chair c2"></span><span class="chair c3"></span><span class="chair c4"></span><span class="chair c5"></span><span class="chair c6"></span></div>
+                <div class="floor-table plan-table group-a" data-seats="7 / 10 places" style="left:175px;top:108px">A3<span class="chair c1"></span><span class="chair c2"></span><span class="chair c3"></span><span class="chair c4"></span><span class="chair c5"></span><span class="chair c6"></span></div>
+                <div class="floor-table plan-table group-a" data-seats="9 / 10 places" style="left:175px;top:190px">A4<span class="chair c1"></span><span class="chair c2"></span><span class="chair c3"></span><span class="chair c4"></span><span class="chair c5"></span><span class="chair c6"></span></div>
+                <div class="floor-table plan-table rectangular group-a" data-seats="12 / 12 places" style="left:270px;top:98px">A5</div>
+                <div class="floor-table plan-table rectangular group-b" data-seats="11 / 12 places" style="left:495px;top:98px">B1</div>
+                <div class="floor-table plan-table group-b" data-seats="10 / 10 places" style="left:600px;top:108px">B2<span class="chair c1"></span><span class="chair c2"></span><span class="chair c3"></span><span class="chair c4"></span><span class="chair c5"></span><span class="chair c6"></span></div>
+                <div class="floor-table plan-table group-b" data-seats="8 / 10 places" style="left:680px;top:108px">B3<span class="chair c1"></span><span class="chair c2"></span><span class="chair c3"></span><span class="chair c4"></span><span class="chair c5"></span><span class="chair c6"></span></div>
+                <div class="floor-table plan-table group-b" data-seats="9 / 10 places" style="left:600px;top:190px">B4<span class="chair c1"></span><span class="chair c2"></span><span class="chair c3"></span><span class="chair c4"></span><span class="chair c5"></span><span class="chair c6"></span></div>
+                <div class="floor-table plan-table group-c" data-seats="6 / 8 places" style="left:110px;top:300px">C1<span class="chair c1"></span><span class="chair c2"></span><span class="chair c3"></span><span class="chair c4"></span><span class="chair c5"></span><span class="chair c6"></span></div>
+                <div class="floor-table plan-table group-c" data-seats="8 / 8 places" style="left:190px;top:300px">C2<span class="chair c1"></span><span class="chair c2"></span><span class="chair c3"></span><span class="chair c4"></span><span class="chair c5"></span><span class="chair c6"></span></div>
+                <div class="floor-table plan-table group-c" data-seats="7 / 8 places" style="left:110px;top:390px">C3<span class="chair c1"></span><span class="chair c2"></span><span class="chair c3"></span><span class="chair c4"></span><span class="chair c5"></span><span class="chair c6"></span></div>
+                <div class="floor-table plan-table group-d" data-seats="8 / 10 places" style="left:555px;top:300px">D1<span class="chair c1"></span><span class="chair c2"></span><span class="chair c3"></span><span class="chair c4"></span><span class="chair c5"></span><span class="chair c6"></span></div>
+                <div class="floor-table plan-table group-d" data-seats="7 / 10 places" style="left:640px;top:300px">D2<span class="chair c1"></span><span class="chair c2"></span><span class="chair c3"></span><span class="chair c4"></span><span class="chair c5"></span><span class="chair c6"></span></div>
+                <div class="floor-table plan-table group-d" data-seats="9 / 10 places" style="left:555px;top:390px">D3<span class="chair c1"></span><span class="chair c2"></span><span class="chair c3"></span><span class="chair c4"></span><span class="chair c5"></span><span class="chair c6"></span></div>
+                <div class="floor-table plan-table group-e" data-seats="8 / 10 places" style="left:210px;top:490px">E1<span class="chair c1"></span><span class="chair c2"></span><span class="chair c3"></span><span class="chair c4"></span><span class="chair c5"></span><span class="chair c6"></span></div>
+                <div class="floor-table plan-table group-e" data-seats="10 / 10 places" style="left:300px;top:490px">E2<span class="chair c1"></span><span class="chair c2"></span><span class="chair c3"></span><span class="chair c4"></span><span class="chair c5"></span><span class="chair c6"></span></div>
+                <div class="floor-table plan-table group-a" data-seats="6 / 8 places" style="left:500px;top:490px">F1<span class="chair c1"></span><span class="chair c2"></span><span class="chair c3"></span><span class="chair c4"></span><span class="chair c5"></span><span class="chair c6"></span></div>
+              </div>
+              <div class="canvas-zoom"><button id="zoomOut">−</button><span id="zoomValue">100%</span><button id="zoomIn">＋</button><button id="zoomFit">⛶</button></div>
+            </div>
+
+            <aside class="planner-inspector">
+              <div class="planner-panel-head"><h3>Propriétés</h3><p>Élément sélectionné</p></div>
+              <div class="detail-grid"><div class="detail wide"><span>Table</span><strong id="selectedTableLabel">A1 · Ronde</strong></div></div>
+              <div class="inspector-section"><b>Configuration</b>
+                <div class="inspector-field"><label>Nom</label><input class="field" id="tableNameInput" value="A1"></div>
+                <div class="inspector-field"><label>Groupe</label><select class="field" id="tableGroupInput"><option>A — Famille & Église</option><option>B — Belle famille</option><option>C — Invités</option><option>D — Connaissances</option><option>E — Amis maison</option></select></div>
+                <div class="inspector-field"><label>Capacité</label><input class="field" id="tableCapacityInput" type="number" value="10" min="1" max="20"></div>
+                <div class="inspector-field"><label>Rotation</label><input class="field" id="tableRotationInput" type="range" min="0" max="360" value="0"></div>
+              </div>
+              <div class="inspector-section"><b>Invités assignés · 8/10</b>
+                <div class="guest-token"><span class="mini-avatar">JM</span><div><strong>Jean Mbuyi</strong><small>Confirmé</small></div><button>×</button></div>
+                <div class="guest-token"><span class="mini-avatar">SK</span><div><strong>Sarah Kavira</strong><small>Confirmée</small></div><button>×</button></div>
+                <div class="guest-token"><span class="mini-avatar">+6</span><div><strong>6 autres invités</strong><small>Voir l'affectation</small></div></div>
+                <button class="btn ghost small" style="width:100%;margin-top:7px" data-demo="Liste des affectations">＋ Assigner des invités</button>
+              </div>
+              <div class="inspector-section"><button class="btn ghost small" style="width:100%;color:var(--red)" id="deletePlanObject">Supprimer l'élément</button></div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="view-operations">
+          <div class="page-head">
+            <div><p class="eyebrow">Mariage Sarah & Joël</p><h1>Opérations</h1><p class="subtle">Logistique, équipe et prestataires réunis au même endroit.</p></div>
+            <button class="btn gold" data-demo="Nouvelle tâche opérationnelle">＋ Ajouter une tâche</button>
+          </div>
+          <div class="stats">
+            <article class="stat"><div class="stat-top"><span>Préparation</span><span class="stat-icon">✓</span></div><div class="stat-value">66%</div><span class="trend">24 / 36 tâches</span></article>
+            <article class="stat"><div class="stat-top"><span>Personnel</span><span class="stat-icon">♙</span></div><div class="stat-value">18</div><span class="subtle">3 rôles non pourvus</span></article>
+            <article class="stat"><div class="stat-top"><span>Matériel réservé</span><span class="stat-icon">□</span></div><div class="stat-value">142</div><span class="subtle">12 catégories</span></article>
+            <article class="stat"><div class="stat-top"><span>Prestataires</span><span class="stat-icon">◇</span></div><div class="stat-value">6</div><span class="trend">5 confirmés</span></article>
+          </div>
+          <div class="ops-grid">
+            <article class="card ops-card"><span class="ops-icon">□</span><h3>Matériel & inventaire</h3><p class="subtle">Réservation, sortie, retour et dommages.</p><div class="check-list"><span class="check done">✓ 30 tables réservées</span><span class="check done">✓ 320 chaises réservées</span><span class="check">○ Sonorisation à confirmer</span></div></article>
+            <article class="card ops-card"><span class="ops-icon">♙</span><h3>Équipe protocole</h3><p class="subtle">Rôles, shifts, présence et paiement.</p><div class="check-list"><span class="check done">✓ Chef protocole assigné</span><span class="check">○ 2 agents d’accueil manquants</span><span class="check done">✓ Briefing planifié</span></div></article>
+            <article class="card ops-card"><span class="ops-icon">◇</span><h3>Prestataires</h3><p class="subtle">Photographe, MC, cuisine et décoration.</p><div class="check-list"><span class="check done">✓ Photographe — Pixel Kivu</span><span class="check done">✓ MC — David Safari</span><span class="check">○ Décorateur — acompte dû</span></div></article>
+            <article class="card ops-card"><span class="ops-icon">◌</span><h3>Boissons du client</h3><p class="subtle">Entrées, consommation et sorties.</p><div class="check-list"><span class="check done">✓ 24 caisses enregistrées</span><span class="check">○ Contrôle final le 24 juillet</span></div></article>
+            <article class="card ops-card"><span class="ops-icon">♧</span><h3>Garde des cadeaux</h3><p class="subtle">Chaîne de garde et remise sécurisée.</p><div class="check-list"><span class="check done">✓ Responsable désigné</span><span class="check">○ Zone de stockage à valider</span></div></article>
+            <article class="card ops-card"><span class="ops-icon">☷</span><h3>Menu & service</h3><p class="subtle">Nourriture, boissons et horaires.</p><div class="check-list"><span class="check done">✓ Menu approuvé par le client</span><span class="check">○ 7 régimes à confirmer</span></div></article>
+          </div>
+        </section>
+
+        <section class="view" id="view-gallery">
+          <div class="page-head">
+            <div><p class="eyebrow">Mariage Sarah & Joël</p><h1>Galerie & menu</h1><p class="subtle">Médias, repas et boissons visibles par l’équipe et les clients.</p></div>
+            <div style="display:flex;gap:8px"><button class="btn ghost" data-action="Nouvel album créé">＋ Album</button><button class="btn gold" data-action="Sélecteur de médias ouvert">↑ Ajouter des médias</button></div>
+          </div>
+          <div class="workspace-tabs"><button class="active">Galerie</button><button>Menu</button><button>Boissons</button><button>Visibilité client</button></div>
+          <div class="stats">
+            <article class="stat"><div class="stat-top"><span>Photos</span><span class="stat-icon">▧</span></div><div class="stat-value">142</div><span class="trend">38 partagées au client</span></article>
+            <article class="stat"><div class="stat-top"><span>Albums</span><span class="stat-icon">□</span></div><div class="stat-value">4</div><span class="subtle">Civil, préparation, jour J</span></article>
+            <article class="stat"><div class="stat-top"><span>Plats</span><span class="stat-icon">☷</span></div><div class="stat-value">8</div><span class="trend">Menu approuvé</span></article>
+            <article class="stat"><div class="stat-top"><span>Régimes spéciaux</span><span class="stat-icon">!</span></div><div class="stat-value">7</div><span class="subtle">3 végétariens · 4 allergies</span></article>
+          </div>
+          <div class="media-grid">
+            <article class="media-item" style="background-image:url('../Celebrons%20V1%20HTML/images/bg/03.JPG')"><div><strong>Mariage civil</strong><small>24 photos · client visible</small></div></article>
+            <article class="media-item" style="background-image:url('../Celebrons%20V1%20HTML/images/bg/05.JPG')"><div><strong>Préparatifs</strong><small>38 photos · privé</small></div></article>
+            <article class="media-item" style="background-image:url('../Celebrons%20V1%20HTML/images/bg/07.JPG')"><div><strong>Décoration</strong><small>31 photos · client visible</small></div></article>
+            <article class="media-item" style="background-image:url('../Celebrons%20V1%20HTML/images/bg/19.JPG')"><div><strong>Jour de l'événement</strong><small>49 photos · brouillon</small></div></article>
+          </div>
+          <div class="split-grid" style="margin-top:18px">
+            <article class="card">
+              <div class="card-head"><div><h2>Menu approuvé</h2><p class="subtle">Service prévu à 18:30</p></div><button class="btn ghost small" data-action="Éditeur de menu ouvert">Modifier</button></div>
+              <div class="section-grid">
+                <div><span class="eyebrow">Entrées</span><h3>Salade Kivu</h3><p class="subtle">Avocat, légumes frais, vinaigrette maison</p></div>
+                <div><span class="eyebrow">Plats</span><h3>Poulet braisé & tilapia</h3><p class="subtle">Riz parfumé, pommes sautées, légumes</p></div>
+                <div><span class="eyebrow">Dessert</span><h3>Buffet célébration</h3><p class="subtle">Gâteau, fruits et mignardises</p></div>
+              </div>
+            </article>
+            <aside class="card">
+              <div class="card-head"><div><h3>Validation client</h3><p class="subtle">Dernière revue le 15 juillet</p></div><span class="badge green">Approuvé</span></div>
+              <div class="movement"><span class="movement-icon">✓</span><div><strong>Menu principal</strong><small>Approuvé par Sarah M.</small></div></div>
+              <div class="movement"><span class="movement-icon">!</span><div><strong>7 régimes spéciaux</strong><small>À confirmer avant le 20 juillet</small></div></div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="view-logistics">
+          <div class="page-head">
+            <div><p class="eyebrow">Mariage Sarah & Joël</p><h1>Logistique</h1><p class="subtle">Matériel, boissons du client et chaîne de garde des cadeaux.</p></div>
+            <button class="btn gold" data-action="Nouveau mouvement logistique prêt">＋ Enregistrer un mouvement</button>
+          </div>
+          <div class="workspace-tabs"><button class="active">Matériel</button><button>Boissons client</button><button>Cadeaux</button><button>Transport</button><button>Incidents</button></div>
+          <div class="stats">
+            <article class="stat"><div class="stat-top"><span>Articles réservés</span><span class="stat-icon">□</span></div><div class="stat-value">412</div><span class="trend">12 catégories</span></article>
+            <article class="stat"><div class="stat-top"><span>Sortis du stock</span><span class="stat-icon">↗</span></div><div class="stat-value">356</div><span class="subtle">86% préparés</span></article>
+            <article class="stat"><div class="stat-top"><span>Boissons client</span><span class="stat-icon">◌</span></div><div class="stat-value">24</div><span class="subtle">caisses réceptionnées</span></article>
+            <article class="stat"><div class="stat-top"><span>Alertes</span><span class="stat-icon">!</span></div><div class="stat-value">2</div><span style="color:var(--red);font-size:11px">Sonorisation · nappes</span></article>
+          </div>
+          <div class="split-grid">
+            <article class="card table-card">
+              <div class="card-head" style="padding:20px 20px 0"><div><h2>Allocation du matériel</h2><p class="subtle">Réservation, sortie et retour</p></div><button class="btn ghost small" data-action="Bon de sortie généré">Bon de sortie</button></div>
+              <table>
+                <thead><tr><th>Article</th><th>Réservé</th><th>Sorti</th><th>Retour</th><th>État</th></tr></thead>
+                <tbody>
+                  <tr><td><strong>Chaises banquet</strong><small>Mobilier</small></td><td>320</td><td>320</td><td>—</td><td><span class="badge green">Prêt</span></td></tr>
+                  <tr><td><strong>Tables rondes 10p</strong><small>Mobilier</small></td><td>30</td><td>30</td><td>—</td><td><span class="badge green">Prêt</span></td></tr>
+                  <tr><td><strong>Nappes bordeaux</strong><small>Textile</small></td><td>34</td><td>28</td><td>—</td><td><span class="badge amber">Manque 6</span></td></tr>
+                  <tr><td><strong>Sonorisation complète</strong><small>Technique</small></td><td>1</td><td>0</td><td>—</td><td><span class="badge red">À confirmer</span></td></tr>
+                </tbody>
+              </table>
+            </article>
+            <aside class="stack">
+              <article class="card">
+                <div class="card-head"><div><h3>Boissons du client</h3><p class="subtle">Entrées et sorties contrôlées</p></div><button class="btn ghost small" data-action="Réconciliation boissons ouverte">Gérer</button></div>
+                <div class="movement"><span class="movement-icon">↓</span><div><strong>24 caisses reçues</strong><small>15 juil. · par Jean M.</small></div><span class="badge green">Signé</span></div>
+                <div class="movement"><span class="movement-icon">◷</span><div><strong>Comptage d'ouverture</strong><small>Prévu le 25 juil. à 12:00</small></div></div>
+              </article>
+              <article class="card">
+                <div class="card-head"><div><h3>Garde des cadeaux</h3><p class="subtle">Responsable : Chantal K.</p></div><span class="badge blue">Configuré</span></div>
+                <div class="movement"><span class="movement-icon">♧</span><div><strong>Zone sécurisée B</strong><small>Remise finale aux clients contre signature</small></div></div>
+              </article>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="view-personnel">
+          <div class="page-head">
+            <div><p class="eyebrow">Mariage Sarah & Joël</p><h1>Personnel & partenaires</h1><p class="subtle">Équipe protocole, shifts, rôles et prestataires externes.</p></div>
+            <button class="btn gold" data-action="Assistant d'affectation ouvert">＋ Affecter une personne</button>
+          </div>
+          <div class="workspace-tabs"><button class="active">Équipe Celebrons</button><button>Prestataires</button><button>Planning</button><button>Présences</button><button>Paiements</button></div>
+          <div class="stats">
+            <article class="stat"><div class="stat-top"><span>Équipe affectée</span><span class="stat-icon">♙</span></div><div class="stat-value">18</div><span class="subtle">sur 21 requis</span></article>
+            <article class="stat"><div class="stat-top"><span>Prestataires</span><span class="stat-icon">◇</span></div><div class="stat-value">6</div><span class="trend">5 confirmés</span></article>
+            <article class="stat"><div class="stat-top"><span>Shifts</span><span class="stat-icon">◷</span></div><div class="stat-value">3</div><span class="subtle">06:00 → 23:30</span></article>
+            <article class="stat"><div class="stat-top"><span>Postes ouverts</span><span class="stat-icon">!</span></div><div class="stat-value">3</div><span style="color:var(--red);font-size:11px">2 accueil · 1 parking</span></article>
+          </div>
+          <div class="split-grid">
+            <article class="card table-card">
+              <div class="card-head" style="padding:20px 20px 0"><div><h2>Équipe du jour J</h2><p class="subtle">Affectations et horaires</p></div><button class="btn ghost small" data-action="Planning imprimé">Imprimer planning</button></div>
+              <table>
+                <thead><tr><th>Personne</th><th>Rôle</th><th>Shift</th><th>Zone</th><th>Statut</th></tr></thead>
+                <tbody>
+                  <tr><td><strong>Amina Mbuyi</strong><small>Responsable événement</small></td><td><span class="role-chip">Chef protocole</span></td><td>10:00–23:30</td><td>Supervision</td><td><span class="badge green">Confirmé</span></td></tr>
+                  <tr><td><strong>David Kambale</strong><small>Équipe protocole</small></td><td><span class="role-chip">Accueil VIP</span></td><td>13:00–19:00</td><td>Entrée A</td><td><span class="badge green">Confirmé</span></td></tr>
+                  <tr><td><strong>Chantal Kavira</strong><small>Équipe logistique</small></td><td><span class="role-chip">Cadeaux</span></td><td>13:00–22:00</td><td>Zone B</td><td><span class="badge green">Confirmé</span></td></tr>
+                  <tr><td><strong>Poste non pourvu</strong><small>2 personnes requises</small></td><td><span class="role-chip">Accueil général</span></td><td>13:00–18:00</td><td>Entrée B</td><td><span class="badge red">Ouvert</span></td></tr>
+                </tbody>
+              </table>
+            </article>
+            <aside class="card">
+              <div class="card-head"><div><h3>Prestataires participants</h3><p class="subtle">Contacts et confirmations</p></div><button class="btn ghost small" data-action="Nouveau prestataire ajouté">＋ Ajouter</button></div>
+              <div class="movement"><span class="movement-icon">▧</span><div><strong>Pixel Kivu</strong><small>Photographe · 08:00–22:00</small></div><span class="badge green">Confirmé</span></div>
+              <div class="movement"><span class="movement-icon">◎</span><div><strong>David Safari</strong><small>Maître de cérémonie</small></div><span class="badge green">Confirmé</span></div>
+              <div class="movement"><span class="movement-icon">☷</span><div><strong>Saveurs du Kivu</strong><small>Cuisine et service</small></div><span class="badge green">Confirmé</span></div>
+              <div class="movement"><span class="movement-icon">◇</span><div><strong>Décor Élégance</strong><small>Décoration · acompte dû</small></div><span class="badge amber">En attente</span></div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="view-finance">
+          <div class="page-head">
+            <div><p class="eyebrow">Mariage Sarah & Joël</p><h1>Finances</h1><p class="subtle">Paiements manuels, dépenses et rentabilité de l’événement.</p></div>
+            <div style="display:flex;gap:8px"><button class="btn ghost" data-action="Formulaire de dépense ouvert">＋ Dépense</button><button class="btn gold" data-open-payment>＋ Paiement</button></div>
+          </div>
+          <div class="workspace-tabs"><button class="active">Vue d’ensemble</button><button>Paiements</button><button>Échéancier</button><button>Dépenses</button><button>Pièces jointes</button></div>
+          <div class="finance-grid">
+            <article class="card money-card"><span class="subtle">Montant convenu</span><strong>$12 500</strong><small>Contrat signé le 08 mai 2026</small></article>
+            <article class="card money-card"><span class="subtle">Montant reçu</span><strong style="color:var(--green)">$8 000</strong><small>64% du montant total</small></article>
+            <article class="card money-card"><span class="subtle">Solde à recevoir</span><strong style="color:var(--amber)">$4 500</strong><small>Prochaine échéance : 20 juillet</small></article>
+          </div>
+          <div class="ledger-grid">
+            <article class="card table-card">
+              <div class="card-head" style="padding:20px 20px 0"><div><h2>Dernières transactions</h2><p class="subtle">Paiements et dépenses enregistrés</p></div><button class="btn ghost small" data-demo="Grand livre complet">Grand livre</button></div>
+              <table>
+                <thead><tr><th>Date</th><th>Description</th><th>Type</th><th>Méthode</th><th>Montant</th></tr></thead>
+                <tbody>
+                  <tr><td>12 juil.</td><td><strong>Deuxième tranche client</strong><small>REC-2026-118</small></td><td><span class="badge green">Paiement</span></td><td>Mobile Money</td><td><strong style="color:var(--green)">+$3 000</strong></td></tr>
+                  <tr><td>10 juil.</td><td><strong>Acompte décoration</strong><small>DEP-2026-092</small></td><td><span class="badge red">Dépense</span></td><td>Espèces</td><td><strong style="color:var(--red)">−$850</strong></td></tr>
+                  <tr><td>08 juil.</td><td><strong>Transport matériel</strong><small>DEP-2026-087</small></td><td><span class="badge red">Dépense</span></td><td>Espèces</td><td><strong style="color:var(--red)">−$120</strong></td></tr>
+                  <tr><td>08 mai</td><td><strong>Acompte initial</strong><small>REC-2026-071</small></td><td><span class="badge green">Paiement</span></td><td>Banque</td><td><strong style="color:var(--green)">+$5 000</strong></td></tr>
+                </tbody>
+              </table>
+            </article>
+            <aside class="card">
+              <div class="card-head"><div><h3>Progression des paiements</h3><p class="subtle">Échéancier du contrat</p></div></div>
+              <div class="donut"></div>
+              <div class="legend"><div><i style="background:var(--green)"></i> Reçu — $8 000</div><div><i style="background:var(--gold)"></i> Dû le 20 juil. — $2 500</div><div><i style="background:#d9d3c8"></i> Solde final — $2 000</div></div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="view-reports">
+          <div class="page-head">
+            <div><p class="eyebrow">Analyse & pilotage</p><h1>Rapports</h1><p class="subtle">Performance événementielle, financière et opérationnelle.</p></div>
+            <div style="display:flex;gap:8px"><select class="field"><option>Mariage Sarah & Joël</option><option>Tous les événements 2026</option></select><button class="btn gold" data-action="Rapport PDF généré">↓ Exporter PDF</button></div>
+          </div>
+          <div class="workspace-tabs"><button class="active">Synthèse</button><button>Finances</button><button>Invitations</button><button>Inventaire</button><button>Personnel</button><button>Clôture</button></div>
+          <div class="stats">
+            <article class="stat"><div class="stat-top"><span>Marge prévue</span><span class="stat-icon">↗</span></div><div class="stat-value">38%</div><span class="trend">+$4 720 estimés</span></article>
+            <article class="stat"><div class="stat-top"><span>Taux RSVP</span><span class="stat-icon">✉</span></div><div class="stat-value">82%</div><span class="trend">235 confirmés</span></article>
+            <article class="stat"><div class="stat-top"><span>Préparation</span><span class="stat-icon">✓</span></div><div class="stat-value">78%</div><span class="subtle">14 tâches ouvertes</span></article>
+            <article class="stat"><div class="stat-top"><span>Écart inventaire</span><span class="stat-icon">□</span></div><div class="stat-value">0%</div><span class="trend">Avant événement</span></article>
+          </div>
+          <div class="split-grid">
+            <article class="card">
+              <div class="card-head"><div><h2>Activité événementielle 2026</h2><p class="subtle">Événements confirmés par mois</p></div><button class="btn ghost small" data-action="Données CSV exportées">CSV</button></div>
+              <div class="bar-chart">
+                <div class="bar-col"><i style="height:32%"></i><span>Jan</span></div><div class="bar-col"><i style="height:45%"></i><span>Fév</span></div>
+                <div class="bar-col"><i style="height:40%"></i><span>Mar</span></div><div class="bar-col"><i style="height:68%"></i><span>Avr</span></div>
+                <div class="bar-col"><i style="height:74%"></i><span>Mai</span></div><div class="bar-col"><i style="height:58%"></i><span>Juin</span></div>
+                <div class="bar-col"><i style="height:90%"></i><span>Juil</span></div><div class="bar-col"><i style="height:81%"></i><span>Août</span></div>
+              </div>
+            </article>
+            <aside class="card">
+              <div class="card-head"><div><h3>Rapport de clôture</h3><p class="subtle">8 sections à valider</p></div><span class="badge amber">En préparation</span></div>
+              <div class="check-list">
+                <span class="check done">✓ Données de l'événement</span><span class="check done">✓ Invitations & présence</span>
+                <span class="check done">✓ Équipe et prestataires</span><span class="check">○ Retour du matériel</span>
+                <span class="check">○ Réconciliation boissons</span><span class="check">○ Paiement final</span>
+                <span class="check">○ Dépenses finales</span><span class="check">○ Validation administrateur</span>
+              </div>
+              <button class="btn ghost small" style="width:100%;margin-top:18px" data-action="Assistant de clôture ouvert">Continuer la clôture</button>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="view-catalog">
+          <div class="page-head">
+            <div><p class="eyebrow">Configuration opérationnelle</p><h1>Référentiels</h1><p class="subtle">Salles, tables, inventaire, services et types d’événement.</p></div>
+            <button class="btn gold" data-action="Assistant de création ouvert">＋ Ajouter un élément</button>
+          </div>
+          <div class="workspace-tabs"><button class="active">Salles</button><button>Types de tables</button><button>Inventaire</button><button>Services</button><button>Types d'événement</button><button>Invitations</button></div>
+          <div class="stats">
+            <article class="stat"><div class="stat-top"><span>Salles actives</span><span class="stat-icon">⌂</span></div><div class="stat-value">6</div><span class="trend">2 plans par salle</span></article>
+            <article class="stat"><div class="stat-top"><span>Capacité totale</span><span class="stat-icon">♙</span></div><div class="stat-value">1 640</div><span class="subtle">invités maximum</span></article>
+            <article class="stat"><div class="stat-top"><span>Types de tables</span><span class="stat-icon">◯</span></div><div class="stat-value">5</div><span class="subtle">4 à 12 places</span></article>
+            <article class="stat"><div class="stat-top"><span>Articles stock</span><span class="stat-icon">□</span></div><div class="stat-value">1 284</div><span class="subtle">36 références</span></article>
+          </div>
+          <div class="venue-grid">
+            <article class="venue-card"><div class="venue-image" style="background-image:url('../Celebrons%20V1%20HTML/images/bg/10.JPG')"><span class="badge green">Intérieure</span></div><div class="venue-body"><h3>La Joie Plaza</h3><p class="subtle">Goma · cuisine disponible · sans étage</p><div class="venue-meta"><span>Capacité <strong>350</strong></span><span>Tables max. <strong>35</strong></span><span>Semaine <strong>$1 600</strong></span><span>Weekend <strong>$2 200</strong></span></div><button class="btn ghost small" data-action="Fiche La Joie Plaza ouverte">Gérer la salle</button></div></article>
+            <article class="venue-card"><div class="venue-image" style="background-image:url('../Celebrons%20V1%20HTML/images/bg/16.JPG')"><span class="badge blue">Intérieure</span></div><div class="venue-body"><h3>Hôtel Serena</h3><p class="subtle">Lac Kivu · cuisine disponible · étage</p><div class="venue-meta"><span>Capacité <strong>220</strong></span><span>Tables max. <strong>24</strong></span><span>Semaine <strong>$2 400</strong></span><span>Weekend <strong>$3 000</strong></span></div><button class="btn ghost small" data-action="Fiche Hôtel Serena ouverte">Gérer la salle</button></div></article>
+            <article class="venue-card"><div class="venue-image" style="background-image:url('../Celebrons%20V1%20HTML/images/bg/20.JPG')"><span class="badge amber">Extérieure</span></div><div class="venue-body"><h3>Villa Kivu</h3><p class="subtle">Goma · jardin · cuisine annexe</p><div class="venue-meta"><span>Capacité <strong>140</strong></span><span>Tables max. <strong>16</strong></span><span>Semaine <strong>$900</strong></span><span>Weekend <strong>$1 300</strong></span></div><button class="btn ghost small" data-action="Fiche Villa Kivu ouverte">Gérer la salle</button></div></article>
+          </div>
+          <div class="feature-index" aria-label="Tous les référentiels">
+            <button data-feature="inventory"><span class="ops-icon">□</span><b>Inventaire</b><small>36 références · 1 284 articles</small></button>
+            <button data-feature="services"><span class="ops-icon">◇</span><b>Services</b><small>Protocole, traiteur, coordination</small></button>
+            <button data-feature="event-types"><span class="ops-icon">◎</span><b>Types d’événement</b><small>Mariage, gala, concert…</small></button>
+            <button data-feature="invitation-metadata"><span class="ops-icon">✉</span><b>Invitations</b><small>Catégories, formats et codes</small></button>
+            <button data-feature="layout-templates"><span class="ops-icon">▦</span><b>Maquettes</b><small>2 modèles par salle</small></button>
+          </div>
+          <article class="card table-card" style="margin-top:18px">
+            <div class="card-head" style="padding:20px 20px 0"><div><h2>Types de tables</h2><p class="subtle">Métadonnées utilisées dans les plans de salle</p></div><button class="btn ghost small" data-action="Nouveau type de table prêt">＋ Type</button></div>
+            <table><thead><tr><th>Type</th><th>Forme</th><th>Capacité</th><th>Dimensions</th><th>Disponibles</th><th>Statut</th></tr></thead><tbody>
+              <tr><td><strong>Ronde banquet</strong><small>TB-R10</small></td><td>Ronde</td><td>10 personnes</td><td>Ø 180 cm</td><td>42</td><td><span class="badge green">Actif</span></td></tr>
+              <tr><td><strong>Rectangulaire VIP</strong><small>TB-V12</small></td><td>Rectangle</td><td>12 personnes</td><td>300 × 90 cm</td><td>12</td><td><span class="badge green">Actif</span></td></tr>
+              <tr><td><strong>Cocktail haute</strong><small>TB-C04</small></td><td>Ronde haute</td><td>4 personnes</td><td>Ø 80 cm</td><td>24</td><td><span class="badge green">Actif</span></td></tr>
+            </tbody></table>
+          </article>
+        </section>
+
+        <section class="view" id="view-users">
+          <div class="page-head">
+            <div><p class="eyebrow">Administration</p><h1>Utilisateurs & accès</h1><p class="subtle">Rôles, permissions globales et accès limités aux événements.</p></div>
+            <button class="btn gold" data-action="Invitation utilisateur préparée">＋ Inviter un utilisateur</button>
+          </div>
+          <div class="workspace-tabs"><button class="active">Utilisateurs</button><button>Rôles & permissions</button><button>Accès événements</button><button>Journal d'audit</button><button>Sessions</button></div>
+          <div class="stats">
+            <article class="stat"><div class="stat-top"><span>Utilisateurs actifs</span><span class="stat-icon">♙</span></div><div class="stat-value">34</div><span class="subtle">28 staff · 6 clients</span></article>
+            <article class="stat"><div class="stat-top"><span>Rôles</span><span class="stat-icon">⚙</span></div><div class="stat-value">7</div><span class="subtle">permissions configurées</span></article>
+            <article class="stat"><div class="stat-top"><span>Invitations en attente</span><span class="stat-icon">✉</span></div><div class="stat-value">3</div><span class="subtle">expiration sous 48h</span></article>
+            <article class="stat"><div class="stat-top"><span>Connexions aujourd'hui</span><span class="stat-icon">↗</span></div><div class="stat-value">21</div><span class="trend">Google sécurisé</span></article>
+          </div>
+          <article class="card table-card">
+            <div class="card-head" style="padding:20px 20px 0"><div><h2>Utilisateurs</h2><p class="subtle">Comptes et niveau d'accès</p></div><input class="field" placeholder="Rechercher un utilisateur…"></div>
+            <table><thead><tr><th>Utilisateur</th><th>Rôle</th><th>Accès</th><th>Dernière connexion</th><th>Statut</th><th></th></tr></thead><tbody>
+              <tr><td><strong>John Chishugi</strong><small>john@celebrons.org</small></td><td><span class="role-chip">Super Admin</span></td><td>Tous les événements</td><td>Aujourd'hui, 14:38</td><td><span class="badge green">Actif</span></td><td><button class="btn ghost small" data-action="Profil John ouvert">Gérer</button></td></tr>
+              <tr><td><strong>Amina Mbuyi</strong><small>amina@celebrons.org</small></td><td><span class="role-chip">Event Manager</span></td><td>6 événements</td><td>Aujourd'hui, 13:22</td><td><span class="badge green">Actif</span></td><td><button class="btn ghost small" data-action="Profil Amina ouvert">Gérer</button></td></tr>
+              <tr><td><strong>Chantal Kavira</strong><small>chantal@celebrons.org</small></td><td><span class="role-chip">Logistique</span></td><td>3 événements</td><td>Hier, 18:40</td><td><span class="badge green">Actif</span></td><td><button class="btn ghost small" data-action="Profil Chantal ouvert">Gérer</button></td></tr>
+              <tr><td><strong>Sarah M.</strong><small>sarah@gmail.com</small></td><td><span class="role-chip">Client</span></td><td>EVT-2026-042</td><td>16 juil., 20:14</td><td><span class="badge blue">Client</span></td><td><button class="btn ghost small" data-view-jump="client">Voir accès</button></td></tr>
+            </tbody></table>
+          </article>
+          <article class="card permission-grid" style="margin-top:18px">
+            <div class="card-head"><div><h2>Matrice de permissions</h2><p class="subtle">Aperçu des actions sensibles</p></div><button class="btn ghost small" data-action="Matrice de permissions modifiable">Modifier</button></div>
+            <table><thead><tr><th>Permission</th><th>Admin</th><th>Manager</th><th>Finance</th><th>Logistique</th><th>Protocole</th><th>Client</th></tr></thead><tbody>
+              <tr><td>Créer / lancer événement</td><td><span class="permission-check">✓</span></td><td><span class="permission-check">✓</span></td><td><span class="permission-check off">—</span></td><td><span class="permission-check off">—</span></td><td><span class="permission-check off">—</span></td><td><span class="permission-check off">—</span></td></tr>
+              <tr><td>Voir finances</td><td><span class="permission-check">✓</span></td><td><span class="permission-check">✓</span></td><td><span class="permission-check">✓</span></td><td><span class="permission-check off">—</span></td><td><span class="permission-check off">—</span></td><td><span class="permission-check">✓</span></td></tr>
+              <tr><td>Gérer logistique</td><td><span class="permission-check">✓</span></td><td><span class="permission-check">✓</span></td><td><span class="permission-check off">—</span></td><td><span class="permission-check">✓</span></td><td><span class="permission-check off">—</span></td><td><span class="permission-check off">—</span></td></tr>
+            </tbody></table>
+          </article>
+        </section>
+
+        <section class="view" id="view-client">
+          <div class="page-head"><div><p class="eyebrow">Mode aperçu</p><h1>Portail client</h1><p class="subtle">Ce que Sarah et Joël voient après leur connexion.</p></div><button class="btn ghost" data-open-primary-event>Quitter l'aperçu client</button></div>
+          <div class="client-shell">
+            <header class="client-head"><div class="public-logo"><span class="public-logo-mark">C</span><span>Celebrons<small>Espace client</small></span></div><div>Sarah & Joël · <button class="btn ghost small" data-public-return>Déconnexion</button></div></header>
+            <div class="client-content">
+              <div class="client-hero">
+                <article class="client-event"><p class="eyebrow" style="color:#e8cb91">Votre événement</p><h2>Mariage Sarah & Joël</h2><p>25 juillet 2026 · La Joie Plaza, Goma</p></article>
+                <article class="card"><div class="card-head"><div><h3>Préparation</h3><p class="subtle">Mise à jour par Celebrons</p></div><strong>78%</strong></div>
+                  <div class="metric-bar"><div class="metric-bar-label"><span>Invitations</span><span>82%</span></div><div class="progress"><span style="width:82%"></span></div></div>
+                  <div class="metric-bar"><div class="metric-bar-label"><span>Plan de salle</span><span>68%</span></div><div class="progress"><span style="width:68%"></span></div></div>
+                  <div class="metric-bar"><div class="metric-bar-label"><span>Menu</span><span>100%</span></div><div class="progress"><span style="width:100%"></span></div></div>
+                  <button class="btn gold small" style="width:100%;margin-top:13px" data-action="Message envoyé à votre responsable">Contacter Amina</button>
+                </article>
+              </div>
+              <div class="section-grid">
+                <button class="feature-card" data-view-jump="invitations"><span class="feature-top"><span class="ops-icon">✉</span><span class="badge amber">41 en attente</span></span><h3>Mes invités</h3><p>Gérer les noms, réponses et besoins alimentaires.</p></button>
+                <button class="feature-card" data-view-jump="floorplan"><span class="feature-top"><span class="ops-icon">▦</span><span>194 / 287</span></span><h3>Plan de salle</h3><p>Consulter et proposer les affectations de tables.</p></button>
+                <button class="feature-card" data-view-jump="gallery"><span class="feature-top"><span class="ops-icon">▧</span><span>38 photos</span></span><h3>Galerie & menu</h3><p>Voir les photos partagées et approuver le menu.</p></button>
+                <button class="feature-card" data-view-jump="finance"><span class="feature-top"><span class="ops-icon">◉</span><span class="badge amber">$4 500 dû</span></span><h3>Paiements</h3><p>Consulter l'échéancier et les reçus enregistrés.</p></button>
+                <button class="feature-card" data-action="Document contractuel ouvert"><span class="feature-top"><span class="ops-icon">☷</span><span>4 fichiers</span></span><h3>Documents</h3><p>Contrat, devis, reçus et documents validés.</p></button>
+                <button class="feature-card" data-action="Centre de validations ouvert"><span class="feature-top"><span class="ops-icon">✓</span><span class="badge green">3 validés</span></span><h3>Validations</h3><p>Décisions et demandes nécessitant votre accord.</p></button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+  <aside class="drawer" id="featureDrawer" aria-hidden="true" aria-labelledby="drawerTitle">
+    <header class="drawer-head">
+      <div><p class="eyebrow" id="drawerEyebrow">Celebrons V2</p><h2 id="drawerTitle">Détails</h2></div>
+      <button class="drawer-close" id="drawerClose" aria-label="Fermer">×</button>
+    </header>
+    <div class="drawer-body" id="drawerBody"></div>
+    <footer class="drawer-foot" id="drawerFoot">
+      <button class="btn ghost" id="drawerCancel">Fermer</button>
+      <button class="btn gold" id="drawerSave">Enregistrer</button>
+    </footer>
+  </aside>
+
+  <dialog id="quoteDialog">
+    <form method="dialog">
+      <div class="modal-head"><div><p class="eyebrow">Parlons de votre projet</p><h2>Demander un devis</h2></div><button class="close" value="cancel" aria-label="Fermer">×</button></div>
+      <div class="modal-body"><div class="form-grid">
+        <label>Nom complet<input class="field" required placeholder="Votre nom"></label>
+        <label>Téléphone<input class="field" required placeholder="+243 …"></label>
+        <label>Email<input class="field" type="email" placeholder="vous@email.com"></label>
+        <label>Type d'événement<select class="field"><option>Mariage</option><option>Anniversaire</option><option>Gala</option><option>Conférence</option><option>Concert</option></select></label>
+        <label>Date souhaitée<input class="field" type="date"></label>
+        <label>Nombre d'invités<input class="field" type="number" min="1" value="150"></label>
+        <label class="full">Votre vision<input class="field" placeholder="Dites-nous ce que vous imaginez…"></label>
+      </div></div>
+      <div class="modal-foot"><button class="btn ghost" value="cancel">Annuler</button><button class="btn gold" value="quote">Envoyer la demande</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="loginDialog">
+    <form method="dialog">
+      <div class="modal-head"><span></span><button class="close" value="cancel" aria-label="Fermer">×</button></div>
+      <div class="modal-body" style="padding:8px 34px 34px">
+        <div class="login-brand">
+          <span class="public-logo-mark">C</span>
+          <h2>Bienvenue sur Celebrons</h2>
+          <p class="subtle">Connectez-vous pour accéder à votre espace sécurisé.</p>
+        </div>
+        <button class="google-btn" value="google"><span class="google-mark">G</span> Continuer avec Google</button>
+        <p class="login-note">L’accès est réservé aux membres de l’équipe Celebrons et aux clients invités à un événement.</p>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="invitationDialog">
+    <form method="dialog">
+      <div class="modal-head"><div><p class="eyebrow">Mariage Sarah & Joël</p><h2>Créer un lot d'invitations</h2></div><button class="close" value="cancel">×</button></div>
+      <div class="modal-body"><div class="form-grid">
+        <label>Nom du lot<input class="field" value="Famille & proches"></label>
+        <label>Catégorie<select class="field"><option>Single</option><option>Couple</option><option>Personnalisée</option></select></label>
+        <label>Format<select class="field"><option>Digital QR</option><option>Imprimée</option><option>QR + imprimée</option></select></label>
+        <label>Codification<select class="field"><option>Nom + code sécurisé</option><option>Alphanumérique</option></select></label>
+        <label>Nombre d'invitations<input class="field" type="number" value="50" min="1"></label>
+        <label>Places par invitation<input class="field" type="number" value="2" min="1"></label>
+      </div></div>
+      <div class="modal-foot"><button class="btn ghost" value="cancel">Annuler</button><button class="btn gold" value="invitation">Générer le lot</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="paymentDialog">
+    <form method="dialog">
+      <div class="modal-head"><div><p class="eyebrow">Finance · EVT-2026-042</p><h2>Enregistrer un paiement</h2></div><button class="close" value="cancel">×</button></div>
+      <div class="modal-body"><div class="form-grid">
+        <label>Montant reçu<input class="field" type="number" value="2500" min="1"></label>
+        <label>Devise<select class="field"><option>USD</option><option>CDF</option></select></label>
+        <label>Méthode<select class="field"><option>Mobile Money</option><option>Espèces</option><option>Virement bancaire</option></select></label>
+        <label>Date de réception<input class="field" type="date" value="2026-07-17"></label>
+        <label>Tranche<select class="field"><option>Troisième tranche</option><option>Solde final</option><option>Paiement libre</option></select></label>
+        <label>Référence<input class="field" placeholder="Transaction / reçu"></label>
+        <label class="full">Note<input class="field" placeholder="Information complémentaire"></label>
+      </div></div>
+      <div class="modal-foot"><button class="btn ghost" value="cancel">Annuler</button><button class="btn gold" value="payment">Enregistrer & générer reçu</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="launchDialog">
+    <form method="dialog">
+      <div class="modal-head"><div><p class="eyebrow">EVT-2026-044 · Confirmé</p><h2>Lancer l'événement</h2></div><button class="close" value="cancel">×</button></div>
+      <div class="modal-body">
+        <p>Celebrons va créer l'espace opérationnel dédié à <strong>Anniversaire Grâce — 30 ans</strong>.</p>
+        <div class="check-list" style="margin:20px 0">
+          <span class="check done">✓ Informations client et contrat complets</span>
+          <span class="check done">✓ Villa Kivu disponible le 09 août</span>
+          <span class="check done">✓ Maquette de salle sélectionnée</span>
+          <span class="check done">✓ Échéancier de paiement configuré</span>
+          <span class="check done">✓ Responsable Jean M. affecté</span>
+        </div>
+        <p class="login-note">Le lancement créera le plan, les tâches, les invitations, la logistique, les accès client et les modules financiers.</p>
+      </div>
+      <div class="modal-foot"><button class="btn ghost" value="cancel">Annuler</button><button class="btn gold" value="launch">Confirmer le lancement</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="eventDialog">
+    <form method="dialog" id="eventForm">
+      <div class="modal-head"><div><p class="eyebrow">Nouvelle fiche</p><h2>Créer un événement</h2></div><button class="close" value="cancel" aria-label="Fermer">×</button></div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <label>Type d’événement<select class="field" required><option>Mariage</option><option>Conférence</option><option>Concert</option><option>Anniversaire</option><option>Gala</option></select></label>
+          <label>Statut initial<select class="field"><option>Prospect</option><option>Négociation</option><option>Confirmé</option></select></label>
+          <label class="full">Nom de l’événement<input class="field" required placeholder="Ex. Mariage Sarah & Joël"></label>
+          <label>Client principal<input class="field" required placeholder="Nom complet"></label>
+          <label>Second client / famille<input class="field" placeholder="Nom du conjoint ou représentant"></label>
+          <label>Téléphone<input class="field" type="tel" placeholder="+243 …"></label>
+          <label>Email<input class="field" type="email" placeholder="client@email.com"></label>
+          <label>Date<input class="field" type="date" value="2026-08-22"></label>
+          <label>Heure<input class="field" type="time" value="14:00"></label>
+          <label>Salle<select class="field"><option>La Joie Plaza</option><option>Hôtel Serena</option><option>Cap Kivu</option><option>Villa Kivu</option></select></label>
+          <label>Invités prévus<input class="field" type="number" min="1" value="150"></label>
+          <label>Code invitation<select class="field"><option>Nom + code sécurisé</option><option>Alphanumérique</option></select></label>
+          <label>Paiement<select class="field"><option>Par tranches</option><option>Cash / paiement unique</option></select></label>
+          <label>Montant convenu<input class="field" type="number" min="0" placeholder="0 USD"></label>
+          <label>Responsable Celebrons<select class="field"><option>Amina Mbuyi</option><option>Jean M.</option><option>Bénédicte N.</option></select></label>
+          <label class="full">Description & attentes<input class="field" placeholder="Vision du client, exigences et notes importantes"></label>
+        </div>
+      </div>
+      <div class="modal-foot"><button class="btn ghost" value="cancel">Annuler</button><button class="btn gold" value="default">Créer et continuer</button></div>
+    </form>
+  </dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const sidebar = document.querySelector("#sidebar");
+    const toast = document.querySelector("#toast");
+    const publicSite = document.querySelector("#publicSite");
+    const portalApp = document.querySelector("#portalApp");
+    const quoteDialog = document.querySelector("#quoteDialog");
+    const loginDialog = document.querySelector("#loginDialog");
+    const invitationDialog = document.querySelector("#invitationDialog");
+    const paymentDialog = document.querySelector("#paymentDialog");
+    const launchDialog = document.querySelector("#launchDialog");
+    const eventDialog = document.querySelector("#eventDialog");
+    const featureDrawer = document.querySelector("#featureDrawer");
+    const drawerBackdrop = document.querySelector("#drawerBackdrop");
+    const drawerTitle = document.querySelector("#drawerTitle");
+    const drawerEyebrow = document.querySelector("#drawerEyebrow");
+    const drawerBody = document.querySelector("#drawerBody");
+    const drawerSave = document.querySelector("#drawerSave");
+    let currentDrawerAction = "Modifications";
+
+    const detail = (label, value, wide = false) =>
+      `<div class="detail${wide ? " wide" : ""}"><span>${label}</span><strong>${value}</strong></div>`;
+    const field = (label, control, wide = false) =>
+      `<label${wide ? ' class="full"' : ""}>${label}${control}</label>`;
+    const input = (value = "", type = "text", extra = "") =>
+      `<input class="field" type="${type}" value="${value}" ${extra}>`;
+    const select = (...options) =>
+      `<select class="field">${options.map(option => `<option>${option}</option>`).join("")}</select>`;
+
+    const featureTemplates = {
+      "event-details": () => ({
+        eyebrow: "EVT-2026-042 · Fiche événement", title: "Détails & contacts", action: "Fiche événement mise à jour",
+        body: `
+          <section class="drawer-section"><div class="drawer-section-title">Informations principales</div>
+            <div class="detail-grid">
+              ${detail("Type", "Mariage")}${detail("Statut", "Planification · actif")}
+              ${detail("Nom", "Mariage Sarah & Joël", true)}
+              ${detail("Date", "25 juillet 2026")}${detail("Horaire", "14:00 – 23:30")}
+              ${detail("Salle", "La Joie Plaza · Goma", true)}
+              ${detail("Invités prévus", "320 personnes")}${detail("Code invitation", "Nom + code sécurisé")}
+              ${detail("Paiement", "Par tranches")}${detail("Montant convenu", "$12 500")}
+            </div>
+          </section>
+          <section class="drawer-section"><div class="drawer-section-title">Clients et famille</div>
+            <div class="form-section"><div class="form-grid">
+              ${field("Cliente principale", input("Sarah Mbuyi"))}${field("Second client", input("Joël Kambale"))}
+              ${field("Téléphone", input("+243 990 123 456", "tel"))}${field("Email", input("sarah@gmail.com", "email"))}
+              ${field("Représentant famille", input("Papa Bahati"))}${field("Téléphone famille", input("+243 997 000 421", "tel"))}
+            </div></div>
+          </section>
+          <section class="drawer-section"><div class="drawer-section-title">Responsabilité & accès</div>
+            <div class="form-section">
+              <div class="switch-row"><div><strong>Amina Mbuyi</strong><small>Responsable événement</small></div><span class="role-chip">Event Manager</span></div>
+              <div class="switch-row"><div><strong>Portail client</strong><small>Sarah et Joël peuvent accéder aux informations publiées</small></div><button class="switch on" aria-label="Accès client actif"></button></div>
+              <div class="switch-row"><div><strong>Validation client requise</strong><small>Menu, plan et galerie</small></div><button class="switch on" aria-label="Validation client active"></button></div>
+            </div>
+          </section>`
+      }),
+      inventory: () => ({
+        eyebrow: "Référentiels · Stock", title: "Inventaire", action: "Article d'inventaire enregistré",
+        body: `
+          <section class="drawer-section"><div class="drawer-section-title">Disponibilité générale</div>
+            <div class="detail-grid">${detail("Références", "36")}${detail("Articles", "1 284")}${detail("Alloués", "412")}${detail("Alertes stock", "3 références")}</div>
+          </section>
+          <section class="drawer-section"><div class="drawer-section-title">Nouvel article</div>
+            <div class="form-section"><div class="form-grid">
+              ${field("Nom", input("Chaise banquet"))}${field("Catégorie", select("Mobilier", "Textile", "Technique", "Cuisine"))}
+              ${field("Unité", select("Pièce", "Caisse", "Lot", "Mètre"))}${field("Quantité", input("320", "number"))}
+              ${field("État", select("Excellent", "Bon", "À réparer", "Hors service"))}${field("Seuil d'alerte", input("40", "number"))}
+              ${field("Description", '<textarea class="field">Chaise blanche empilable pour réception.</textarea>', true)}
+            </div></div>
+          </section>
+          <section class="drawer-section"><div class="notice">Le stock disponible est calculé depuis les entrées, allocations, sorties, retours, pertes et dommages. Il n'est jamais écrasé manuellement.</div></section>`
+      }),
+      services: () => ({
+        eyebrow: "Référentiels · Offre", title: "Services Celebrons", action: "Catalogue de services mis à jour",
+        body: `
+          <section class="drawer-section"><div class="movement"><span class="movement-icon">♙</span><div><strong>Protocole & accueil</strong><small>Accueil général, VIP, orientation et service</small></div><span class="badge green">Public</span></div>
+          <div class="movement"><span class="movement-icon">☷</span><div><strong>Traiteur & service</strong><small>Menu, cuisine, boissons et service en salle</small></div><span class="badge green">Public</span></div>
+          <div class="movement"><span class="movement-icon">◇</span><div><strong>Coordination complète</strong><small>Planning, salle, équipe, partenaires et jour J</small></div><span class="badge green">Public</span></div></section>
+          <section class="drawer-section"><div class="drawer-section-title">Configurer un service</div><div class="form-section"><div class="form-grid">
+            ${field("Nom", input("Protocole & accueil"))}${field("Mode tarifaire", select("Forfait", "Par invité", "Par heure"))}
+            ${field("Prix de base", input("850", "number"))}${field("Statut", select("Actif", "Brouillon", "Archivé"))}
+            ${field("Description publique", '<textarea class="field">Une équipe formée pour accueillir, orienter et servir vos invités.</textarea>', true)}
+          </div></div></section>`
+      }),
+      "event-types": () => ({
+        eyebrow: "Référentiels · Workflows", title: "Types d'événement", action: "Type d'événement enregistré",
+        body: `
+          <section class="drawer-section"><div class="movement"><span class="movement-icon">♡</span><div><strong>Mariage</strong><small>28 tâches par défaut · 9 modules</small></div><span class="badge green">Actif</span></div>
+          <div class="movement"><span class="movement-icon">◎</span><div><strong>Conférence</strong><small>21 tâches par défaut · check-in renforcé</small></div><span class="badge green">Actif</span></div>
+          <div class="movement"><span class="movement-icon">◇</span><div><strong>Gala / concert</strong><small>24 tâches · sécurité et technique</small></div><span class="badge green">Actif</span></div>
+          <div class="movement"><span class="movement-icon">✦</span><div><strong>Anniversaire</strong><small>18 tâches · expérience privée</small></div><span class="badge green">Actif</span></div></section>
+          <section class="drawer-section"><div class="drawer-section-title">Paramètres de lancement</div><div class="form-section">
+            <div class="switch-row"><div><strong>Invitations et RSVP</strong><small>Créer le module au lancement</small></div><button class="switch on"></button></div>
+            <div class="switch-row"><div><strong>Plan de salle</strong><small>Copier une maquette de la salle</small></div><button class="switch on"></button></div>
+            <div class="switch-row"><div><strong>Logistique et inventaire</strong><small>Créer les listes de préparation</small></div><button class="switch on"></button></div>
+          </div></section>`
+      }),
+      "invitation-metadata": () => ({
+        eyebrow: "Référentiels · Invitations", title: "Catégories & codification", action: "Paramètres d'invitation enregistrés",
+        body: `
+          <section class="drawer-section"><div class="drawer-section-title">Catégories</div><div class="detail-grid">
+            ${detail("Single", "1 personne")}${detail("Couple", "2 personnes")}
+            ${detail("Personnalisée", "Capacité définie par invitation", true)}
+          </div></section>
+          <section class="drawer-section"><div class="drawer-section-title">Formats disponibles</div><div class="form-section">
+            <div class="switch-row"><div><strong>Digital QR</strong><small>Invitation et contrôle par code sécurisé</small></div><button class="switch on"></button></div>
+            <div class="switch-row"><div><strong>Imprimée</strong><small>Fichier haute définition et suivi de remise</small></div><button class="switch on"></button></div>
+            <div class="switch-row"><div><strong>Digital + imprimée</strong><small>Une identité commune sur les deux supports</small></div><button class="switch on"></button></div>
+          </div></section>
+          <section class="drawer-section"><div class="drawer-section-title">Codification</div><div class="form-section"><div class="form-grid">
+            ${field("Affichage", select("Nom + code sécurisé", "Alphanumérique uniquement"))}
+            ${field("Longueur aléatoire", select("8 caractères", "10 caractères", "12 caractères"))}
+            ${field("Exemple", input("BAHATI-X7K2", "text", "disabled"), true)}
+          </div></div><div class="notice" style="margin-top:10px">Même en mode nom, une composante aléatoire non devinable protège chaque invitation.</div></section>`
+      }),
+      "layout-templates": () => ({
+        eyebrow: "La Joie Plaza · Maquettes", title: "Plans par défaut", action: "Maquettes de salle enregistrées",
+        body: `
+          <section class="drawer-section"><div class="notice">Chaque salle active possède exactement deux maquettes. Un événement reçoit une copie versionnée de la maquette sélectionnée.</div></section>
+          <section class="drawer-section"><div class="layout-preview-grid">
+            <button class="layout-preview">${[1,2,3,4,5,6].map((n,i)=>`<i style="left:${18+(i%3)*31}%;top:${18+Math.floor(i/3)*35}%"></i>`).join("")}<strong>Maquette A · Classique</strong></button>
+            <button class="layout-preview">${[1,2,3,4].map((n,i)=>`<i style="left:${20+(i%2)*46}%;top:${18+Math.floor(i/2)*38}%;border-radius:5px;width:42px"></i>`).join("")}<strong>Maquette B · Banquet</strong></button>
+          </div></section>
+          <section class="drawer-section"><div class="drawer-section-title">Règles de la salle</div><div class="form-section"><div class="form-grid">
+            ${field("Capacité maximale", input("350", "number"))}${field("Tables maximales", input("35", "number"))}
+            ${field("Éléments fixes", input("Scène, entrée A/B, cuisine", "text"), true)}
+          </div></div></section>`
+      })
+    };
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(window.toastTimer);
+      window.toastTimer = setTimeout(() => toast.classList.remove("show"), 2400);
+    }
+
+    function genericFeature(label) {
+      const key = label.toLowerCase();
+      const formWrap = content => `<section class="drawer-section"><div class="form-section"><div class="form-grid">${content}</div></div></section>`;
+      if (key.includes("scanner qr") || key.includes("check-in")) return {
+        eyebrow: "Jour J · Contrôle d'accès", title: "Check-in des invités", action: "Présence enregistrée",
+        body: `<section class="drawer-section"><div class="upload-zone" style="padding:44px 18px"><b style="font-size:18px">⌗ Scanner actif</b>Présentez le QR code de l'invitation devant la caméra</div></section>
+          <section class="drawer-section"><div class="detail-grid">${detail("Arrivées", "126 / 235")}${detail("Dernière entrée", "Famille Bahati · 4 pers.")}</div></section>
+          ${formWrap(field("Saisie manuelle", input("Code ou nom de l'invité"), true) + field("Point d'entrée", select("Entrée A", "Entrée B", "Accueil VIP")))}`
+      };
+      if (key.includes("recherche")) return {
+        eyebrow: "Recherche globale", title: label, action: "Résultat ouvert",
+        body: `<section class="drawer-section">
+          <div class="movement"><span class="movement-icon">◇</span><div><strong>Mariage Sarah & Joël</strong><small>Événement · EVT-2026-042</small></div><span class="badge green">Actif</span></div>
+          <div class="movement"><span class="movement-icon">♙</span><div><strong>Sarah Mbuyi</strong><small>Cliente · 1 événement</small></div></div>
+          <div class="movement"><span class="movement-icon">✉</span><div><strong>Famille Bahati</strong><small>Invitation BAHATI-X7K2 · Table 04</small></div></div>
+        </section>`
+      };
+      if (key.includes("notification")) return {
+        eyebrow: "Centre d'attention", title: "Notifications", action: "Notifications marquées comme lues",
+        body: `<section class="drawer-section">
+          <div class="movement"><span class="movement-icon">!</span><div><strong>3 conflits dans le plan de salle</strong><small>Sarah & Joël · il y a 12 min</small></div><span class="badge red">Urgent</span></div>
+          <div class="movement"><span class="movement-icon">◉</span><div><strong>Échéance client dans 3 jours</strong><small>$2 500 · Finance</small></div><span class="badge amber">À suivre</span></div>
+          <div class="movement"><span class="movement-icon">♙</span><div><strong>Deux postes d'accueil non pourvus</strong><small>Jour J · Personnel</small></div><span class="badge amber">Action</span></div>
+          <div class="movement"><span class="movement-icon">✓</span><div><strong>Menu approuvé par Sarah</strong><small>Hier à 20:14 · Portail client</small></div><span class="badge green">Nouveau</span></div>
+        </section>`
+      };
+      if (key.includes("filtre") || key.includes("calendrier")) return {
+        eyebrow: "Planification", title: key.includes("calendrier") ? "Calendrier complet" : "Filtres avancés", action: "Filtres appliqués",
+        body: formWrap(
+          field("Période", select("Juillet 2026", "Août 2026", "3 prochains mois", "Année 2026")) +
+          field("Statut", select("Tous", "Négociation", "Confirmé", "Planification", "Terminé")) +
+          field("Responsable", select("Tous", "Amina Mbuyi", "Jean M.", "Bénédicte N.")) +
+          field("Salle", select("Toutes", "La Joie Plaza", "Hôtel Serena", "Villa Kivu")) +
+          field("Type", select("Tous", "Mariage", "Gala", "Conférence", "Anniversaire"), true)
+        )
+      };
+      if (key.includes("invitation") || key.includes("affectation")) return {
+        eyebrow: "Invités & invitations", title: label.replace(" ouvert", ""), action: "Invitation mise à jour",
+        body: `<section class="drawer-section"><div class="detail-grid">
+          ${detail("Groupe", "Famille Bahati")}${detail("Code", "BAHATI-X7K2")}
+          ${detail("Catégorie", "Personnalisée · 4 places")}${detail("Format", "QR + imprimée")}
+          ${detail("RSVP", "4 confirmés")}${detail("Table", "Table 04")}
+        </div></section>${formWrap(
+          field("Contact", input("+243 997 123 987", "tel")) +
+          field("Statut", select("Confirmé", "En attente", "Décliné")) +
+          field("Table", select("Table 04", "Table 07", "Non assigné")) +
+          field("Besoins alimentaires", input("Aucun"), true)
+        )}`
+      };
+      if (key.includes("historique") || key.includes("conflit") || key.includes("aperçu pdf")) return {
+        eyebrow: "Plan de salle", title: label.replace(" ouvert", ""), action: "Plan de salle validé",
+        body: key.includes("historique") ? `<section class="drawer-section">
+          <div class="timeline"><div class="timeline-item"><strong>Version 8 · Brouillon actuel</strong><small>Amina · aujourd'hui 14:42</small></div>
+          <div class="timeline-item"><strong>Version 7 · Publiée</strong><small>John · 16 juillet 18:20</small></div>
+          <div class="timeline-item"><strong>Version 1 · Maquette A copiée</strong><small>Système · lancement de l'événement</small></div></div></section>` :
+          `<section class="drawer-section"><div class="notice">Le plan est contrôlé avant publication.</div>
+          <div class="movement"><span class="movement-icon">!</span><div><strong>Table 02 dépasse sa capacité</strong><small>10 places disponibles · 11 invités</small></div><span class="badge red">Bloquant</span></div>
+          <div class="movement"><span class="movement-icon">!</span><div><strong>Passage de service trop étroit</strong><small>Entre Table 04 et Table 05</small></div><span class="badge amber">Ajuster</span></div>
+          <div class="movement"><span class="movement-icon">!</span><div><strong>2 invités sans chaise</strong><small>Table 07</small></div><span class="badge amber">Ajuster</span></div></section>`
+      };
+      if (key.includes("tâche")) return {
+        eyebrow: "Planification opérationnelle", title: "Nouvelle tâche", action: "Tâche créée et affectée",
+        body: formWrap(
+          field("Titre", input("Confirmer la sonorisation"), true) +
+          field("Responsable", select("Amina Mbuyi", "Chantal Kavira", "David Kambale")) +
+          field("Échéance", input("2026-07-20", "date")) +
+          field("Priorité", select("Haute", "Normale", "Basse")) +
+          field("Module", select("Logistique", "Invitations", "Personnel", "Finance")) +
+          field("Instructions", '<textarea class="field">Vérifier le matériel, l’heure d’installation et le technicien.</textarea>', true)
+        )
+      };
+      if (key.includes("album") || key.includes("média") || key.includes("menu")) return {
+        eyebrow: "Galerie & expérience client", title: key.includes("menu") ? "Éditeur de menu" : "Médias de l'événement", action: key.includes("menu") ? "Menu enregistré et soumis au client" : "Médias ajoutés à l'album",
+        body: key.includes("menu") ? formWrap(
+          field("Service", select("Entrées", "Plat principal", "Dessert", "Boissons")) +
+          field("Heure", input("18:30", "time")) +
+          field("Nom", input("Poulet braisé & tilapia"), true) +
+          field("Description", '<textarea class="field">Riz parfumé, pommes sautées et légumes de saison.</textarea>', true) +
+          field("Visibilité", select("Visible par le client", "Interne uniquement"))
+        ) : `<section class="drawer-section"><div class="upload-zone"><b>Déposez les photos et vidéos ici</b>JPG, PNG, WEBP ou MP4 · 20 Mo maximum par fichier</div></section>
+          ${formWrap(field("Album", select("Mariage civil", "Préparatifs", "Décoration", "Jour J")) + field("Visibilité", select("Interne", "Partagé au client")))}`
+      };
+      if (key.includes("mouvement") || key.includes("boisson") || key.includes("sortie") || key.includes("réconciliation")) return {
+        eyebrow: "Logistique & traçabilité", title: key.includes("boisson") ? "Réconciliation des boissons" : "Mouvement de matériel", action: "Mouvement enregistré dans l'historique",
+        body: formWrap(
+          field("Type", select("Sortie", "Retour", "Entrée client", "Perte", "Dommage")) +
+          field("Article", select("Chaises banquet", "Tables rondes", "Nappes bordeaux", "Caisses de boissons")) +
+          field("Quantité", input("24", "number")) +
+          field("État", select("Bon", "Endommagé", "Manquant")) +
+          field("Responsable", select("Chantal Kavira", "Jean M.", "Amina Mbuyi")) +
+          field("Référence / note", input("Bon EVT-042-03"), true)
+        ) + `<section class="drawer-section"><div class="notice">L'enregistrement est horodaté et ajouté au journal d'audit. Le stock est recalculé automatiquement.</div></section>`
+      };
+      if (key.includes("affect") || key.includes("prestataire") || key.includes("planning")) return {
+        eyebrow: "Personnel & partenaires", title: key.includes("prestataire") ? "Prestataire participant" : "Affectation à l'événement", action: "Affectation enregistrée",
+        body: formWrap(
+          field("Personne / entreprise", input(key.includes("prestataire") ? "Pixel Kivu" : "David Kambale")) +
+          field("Type", select("Protocole", "Photographe", "MC", "Cuisine", "Décoration")) +
+          field("Rôle", input("Accueil VIP")) +
+          field("Zone", input("Entrée A")) +
+          field("Début", input("13:00", "time")) +
+          field("Fin", input("19:00", "time")) +
+          field("Montant convenu", input("120", "number")) +
+          field("Statut", select("Confirmé", "En attente", "Refusé"))
+        )
+      };
+      if (key.includes("dépense")) return {
+        eyebrow: "Finance · Dépenses", title: "Enregistrer une dépense", action: "Dépense enregistrée et auditée",
+        body: formWrap(
+          field("Catégorie", select("Personnel protocole", "Transport", "Prestataire", "Matériel", "Autre")) +
+          field("Bénéficiaire", input("Décor Élégance")) +
+          field("Montant", input("850", "number")) +
+          field("Devise", select("USD", "CDF")) +
+          field("Méthode", select("Espèces", "Mobile Money", "Banque")) +
+          field("Date", input("2026-07-17", "date")) +
+          field("Justificatif", input("", "file"), true) +
+          field("Note", '<textarea class="field">Acompte décoration.</textarea>', true)
+        )
+      };
+      if (key.includes("rapport") || key.includes("export") || key.includes("csv") || key.includes("clôture") || key.includes("grand livre")) return {
+        eyebrow: "Rapports & conformité", title: label.replace(" ouvert", ""), action: "Document généré avec succès",
+        body: `<section class="drawer-section"><div class="detail-grid">
+          ${detail("Événement", "Mariage Sarah & Joël", true)}${detail("Période", "08 mai – 25 juillet 2026")}
+          ${detail("Format", key.includes("csv") ? "CSV" : "PDF sécurisé")}${detail("Sections", "8")}
+        </div></section>
+        <section class="drawer-section"><div class="drawer-section-title">Contenu du document</div><div class="form-section">
+          <div class="switch-row"><div><strong>Synthèse & indicateurs</strong><small>Préparation, présence et résultats</small></div><button class="switch on"></button></div>
+          <div class="switch-row"><div><strong>Finances & rentabilité</strong><small>Paiements, dépenses et marge</small></div><button class="switch on"></button></div>
+          <div class="switch-row"><div><strong>Logistique & inventaire</strong><small>Sorties, retours et écarts</small></div><button class="switch on"></button></div>
+          <div class="switch-row"><div><strong>Personnel & prestataires</strong><small>Présences, shifts et paiements</small></div><button class="switch on"></button></div>
+        </div></section>`
+      };
+      if (key.includes("salle") || key.includes("plaza") || key.includes("serena") || key.includes("villa kivu")) return {
+        eyebrow: "Référentiels · Salle", title: label.replace("Fiche ", "").replace(" ouverte", ""), action: "Salle et tarification mises à jour",
+        body: `<section class="drawer-section"><div class="detail-grid">
+          ${detail("Type", "Intérieure")}${detail("Localisation", "Goma, Nord-Kivu")}
+          ${detail("Capacité", "350 invités")}${detail("Tables maximales", "35")}
+          ${detail("Prix semaine", "$1 600")}${detail("Prix weekend", "$2 200")}
+          ${detail("Cuisine", "Disponible")}${detail("Configuration", "Sans étage")}
+          ${detail("Description", "Salle de réception modulable avec scène, accès cuisine et deux entrées.", true)}
+        </div></section>
+        <section class="drawer-section"><div class="drawer-section-title">Deux maquettes par défaut</div>
+          <div class="layout-preview-grid"><div class="layout-preview"><i style="left:20%;top:20%"></i><i style="left:55%;top:20%"></i><i style="left:38%;top:54%"></i><strong>A · Classique</strong></div>
+          <div class="layout-preview"><i style="left:18%;top:24%;border-radius:5px;width:44px"></i><i style="left:58%;top:24%;border-radius:5px;width:44px"></i><strong>B · Banquet</strong></div></div>
+        </section>`
+      };
+      if (key.includes("table")) return featureTemplates["layout-templates"]();
+      if (key.includes("utilisateur") || key.includes("profil") || key.includes("permission")) return {
+        eyebrow: "Administration & sécurité", title: label.replace(" ouverte", ""), action: "Accès utilisateur enregistré",
+        body: formWrap(
+          field("Nom complet", input("Nouvel utilisateur")) +
+          field("Email Google", input("utilisateur@gmail.com", "email")) +
+          field("Rôle", select("Admin", "Event Manager", "Finance", "Logistique", "Protocole", "Client")) +
+          field("Portée", select("Événements affectés", "Tous les événements")) +
+          field("Événement", select("Mariage Sarah & Joël", "Anniversaire Grâce", "Aucun")) +
+          field("Statut", select("Invitation en attente", "Actif", "Suspendu"))
+        ) + `<section class="drawer-section"><div class="notice">L'utilisateur se connectera avec Google. Les permissions du rôle sont combinées avec son accès explicite aux événements.</div></section>`
+      };
+      if (key.includes("document") || key.includes("validation")) return {
+        eyebrow: "Portail client", title: label.replace(" ouvert", ""), action: "Élément partagé au client",
+        body: `<section class="drawer-section">
+          <div class="movement"><span class="movement-icon">☷</span><div><strong>Contrat signé</strong><small>PDF · 08 mai 2026</small></div><span class="badge green">Validé</span></div>
+          <div class="movement"><span class="movement-icon">◉</span><div><strong>Reçu deuxième tranche</strong><small>PDF · 12 juillet 2026</small></div><span class="badge blue">Partagé</span></div>
+          <div class="movement"><span class="movement-icon">✓</span><div><strong>Menu principal</strong><small>Approuvé par Sarah le 15 juillet</small></div><span class="badge green">Approuvé</span></div>
+          <div class="movement"><span class="movement-icon">◷</span><div><strong>Plan de salle version 8</strong><small>En attente de revue client</small></div><span class="badge amber">En attente</span></div>
+        </section>`
+      };
+      return {
+        eyebrow: "Celebrons V2 · Fonction", title: label.replace(" ouvert", ""), action: `${label.replace(" ouvert", "")} enregistré`,
+        body: `<section class="drawer-section"><div class="notice">Cette fonction est intégrée au parcours Celebrons V2 et conserve un historique complet des modifications.</div></section>
+          ${formWrap(field("Statut", select("Actif", "En attente", "Terminé")) + field("Responsable", select("Amina Mbuyi", "John Chishugi", "Chantal Kavira")) + field("Note", '<textarea class="field" placeholder="Ajouter une note opérationnelle…"></textarea>', true))}`
+      };
+    }
+
+    function openDrawer(feature, label) {
+      const template = featureTemplates[feature] ? featureTemplates[feature]() : genericFeature(label || feature || "Détails");
+      drawerEyebrow.textContent = template.eyebrow || "Celebrons V2";
+      drawerTitle.textContent = template.title || "Détails";
+      drawerBody.innerHTML = template.body || "";
+      currentDrawerAction = template.action || "Modifications enregistrées";
+      drawerSave.textContent = template.saveLabel || "Enregistrer";
+      featureDrawer.classList.add("open");
+      drawerBackdrop.classList.add("open");
+      featureDrawer.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+      featureDrawer.querySelectorAll(".switch").forEach(control => {
+        control.addEventListener("click", () => control.classList.toggle("on"));
+      });
+    }
+
+    function closeDrawer(saved = false) {
+      featureDrawer.classList.remove("open");
+      drawerBackdrop.classList.remove("open");
+      featureDrawer.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+      if (saved) showToast(currentDrawerAction);
+    }
+
+    function showView(name, activeButton) {
+      document.querySelectorAll(".view").forEach(view => view.classList.remove("active"));
+      document.querySelector(`#view-${name}`)?.classList.add("active");
+      document.querySelectorAll(".nav button[data-view]").forEach(button => button.classList.remove("active"));
+      (activeButton || document.querySelector(`.nav button[data-view="${name}"]`))?.classList.add("active");
+      sidebar.classList.remove("open");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function setActiveEvent(eventData) {
+      document.querySelector("#activeEventTitle").textContent = eventData.title;
+      document.querySelector("#activeEventDate").textContent = eventData.date;
+      document.querySelector("#activeEventVenue").textContent = eventData.venue;
+      document.querySelector("#activeEventClients").textContent = eventData.clients;
+      document.querySelector("#activeEventGuests").textContent = eventData.guests;
+      document.querySelector("#activeEventManager").textContent = eventData.manager;
+    }
+
+    document.querySelectorAll("[data-view]").forEach(button => {
+      button.addEventListener("click", () => showView(button.dataset.view, button));
+    });
+    document.querySelectorAll("[data-view-jump]").forEach(button => {
+      button.addEventListener("click", () => showView(button.dataset.viewJump));
+    });
+    document.querySelectorAll("[data-feature]").forEach(button => {
+      button.addEventListener("click", () => openDrawer(button.dataset.feature, button.textContent.trim()));
+    });
+    document.querySelectorAll("[data-demo]").forEach(button => {
+      button.addEventListener("click", () => openDrawer(null, button.dataset.demo));
+    });
+    document.querySelectorAll("[data-action]").forEach(button => {
+      button.addEventListener("click", () => openDrawer(null, button.dataset.action));
+    });
+    document.querySelectorAll("[data-open-event]").forEach(button => {
+      button.addEventListener("click", () => eventDialog.showModal());
+    });
+    document.querySelectorAll("[data-open-quote]").forEach(button => {
+      button.addEventListener("click", () => quoteDialog.showModal());
+    });
+    document.querySelectorAll("[data-open-invitation]").forEach(button => {
+      button.addEventListener("click", () => invitationDialog.showModal());
+    });
+    document.querySelectorAll("[data-open-payment]").forEach(button => {
+      button.addEventListener("click", () => paymentDialog.showModal());
+    });
+    document.querySelectorAll("[data-open-launch]").forEach(button => {
+      button.addEventListener("click", () => launchDialog.showModal());
+    });
+    document.querySelectorAll("[data-open-primary-event]").forEach(button => {
+      button.addEventListener("click", () => {
+        setActiveEvent({
+          title: "Mariage Sarah & Joël", date: "25 juillet 2026 · 14:00",
+          venue: "La Joie Plaza, Goma", clients: "Sarah M. & Joël K.",
+          guests: "287 / 320 enregistrés", manager: "Amina Mbuyi"
+        });
+        showView("event");
+      });
+    });
+    document.querySelectorAll("[data-login]").forEach(button => {
+      button.addEventListener("click", event => {
+        event.preventDefault();
+        loginDialog.showModal();
+      });
+    });
+
+    document.querySelector("#menuToggle").addEventListener("click", () => sidebar.classList.toggle("open"));
+    document.querySelector("#publicMenuToggle").addEventListener("click", () => {
+      document.querySelector(".public-links").classList.toggle("open");
+    });
+    document.querySelector("#drawerClose").addEventListener("click", () => closeDrawer());
+    document.querySelector("#drawerCancel").addEventListener("click", () => closeDrawer());
+    document.querySelector("#drawerSave").addEventListener("click", () => closeDrawer(true));
+    drawerBackdrop.addEventListener("click", () => closeDrawer());
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && featureDrawer.classList.contains("open")) closeDrawer();
+    });
+    document.querySelectorAll("[data-public-return]").forEach(button => {
+      button.addEventListener("click", () => {
+        portalApp.hidden = true;
+        publicSite.hidden = false;
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    });
+    document.querySelectorAll(".workspace-tabs").forEach(tabList => {
+      tabList.querySelectorAll("button").forEach(button => {
+        button.addEventListener("click", () => {
+          if (button.hasAttribute("data-view-jump") || button.hasAttribute("data-demo") || button.hasAttribute("data-feature")) return;
+          tabList.querySelectorAll("button").forEach(item => item.classList.remove("active"));
+          button.classList.add("active");
+          const section = button.closest(".view");
+          const context = section?.querySelector("h1")?.textContent || "Espace";
+          openDrawer(null, `${context} · ${button.textContent.trim()}`);
+        });
+      });
+    });
+    document.querySelector("#globalSearch").addEventListener("keydown", event => {
+      if (event.key === "Enter") openDrawer(null, `Recherche · ${event.currentTarget.value || "tous les éléments"}`);
+    });
+
+    eventDialog.addEventListener("close", () => {
+      if (eventDialog.returnValue === "default") {
+        showView("events");
+        showToast("Fiche créée en brouillon · complétez-la avant le lancement");
+      }
+    });
+    quoteDialog.addEventListener("close", () => {
+      if (quoteDialog.returnValue === "quote") showToast("Demande envoyée · notre équipe vous contactera");
+    });
+    invitationDialog.addEventListener("close", () => {
+      if (invitationDialog.returnValue === "invitation") showToast("50 invitations sécurisées générées");
+    });
+    paymentDialog.addEventListener("close", () => {
+      if (paymentDialog.returnValue === "payment") showToast("Paiement de $2 500 enregistré · reçu généré");
+    });
+    launchDialog.addEventListener("close", () => {
+      if (launchDialog.returnValue === "launch") {
+        setActiveEvent({
+          title: "Anniversaire Grâce — 30 ans", date: "09 août 2026 · 18:00",
+          venue: "Villa Kivu, Goma", clients: "Grâce K. & famille",
+          guests: "0 / 90 enregistrés", manager: "Jean M."
+        });
+        showView("event");
+        showToast("Événement lancé · tous les espaces opérationnels sont prêts");
+      }
+    });
+    loginDialog.addEventListener("close", () => {
+      if (loginDialog.returnValue === "google") {
+        publicSite.hidden = true;
+        portalApp.hidden = false;
+        showView("dashboard");
+        showToast("Connexion réussie · Espace administrateur");
+      }
+    });
+    document.querySelector("#publishPlan").addEventListener("click", () => showToast("Plan publié comme version 9"));
+
+    const calendar = document.querySelector("#calendar");
+    for (let i = 29; i <= 30; i++) calendar.insertAdjacentHTML("beforeend", `<span class="day muted">${i}</span>`);
+    for (let day = 1; day <= 31; day++) {
+      const classes = ["day"];
+      if (day === 17) classes.push("today");
+      if ([4, 11, 16, 25].includes(day)) classes.push("event-day");
+      calendar.insertAdjacentHTML("beforeend", `<span class="${classes.join(" ")}">${day}</span>`);
+    }
+    for (let i = 1; i <= 2; i++) calendar.insertAdjacentHTML("beforeend", `<span class="day muted">${i}</span>`);
+
+    const planCanvas = document.querySelector("#floor");
+    let selectedPlanObject = document.querySelector(".floor-table.selected");
+    let plannerZoom = 1;
+    let createdTableCount = 1;
+
+    function objectLabel(object) {
+      if (!object) return "Aucun élément";
+      return object.classList.contains("floor-table")
+        ? `${object.childNodes[0].textContent.trim()} · ${object.classList.contains("rectangular") ? "Rectangulaire" : "Ronde"}`
+        : object.textContent.trim() || "Zone de salle";
+    }
+
+    function selectPlanObject(object) {
+      document.querySelectorAll(".floor-table, .plan-zone").forEach(item => item.classList.remove("selected"));
+      object.classList.add("selected");
+      selectedPlanObject = object;
+      document.querySelector("#selectedTableLabel").textContent = objectLabel(object);
+      const nameInput = document.querySelector("#tableNameInput");
+      nameInput.value = object.classList.contains("floor-table") ? object.childNodes[0].textContent.trim() : object.textContent.trim();
+      document.querySelector("#tableCapacityInput").disabled = !object.classList.contains("floor-table");
+    }
+
+    function bindPlanObject(object) {
+      object.addEventListener("pointerdown", event => {
+        if (event.target.closest("button")) return;
+        event.preventDefault();
+        selectPlanObject(object);
+        object.setPointerCapture(event.pointerId);
+        const floorRect = planCanvas.getBoundingClientRect();
+        const objectRect = object.getBoundingClientRect();
+        const offsetX = event.clientX - objectRect.left;
+        const offsetY = event.clientY - objectRect.top;
+
+        function move(pointerEvent) {
+          const maxX = planCanvas.clientWidth - object.offsetWidth - 8;
+          const maxY = planCanvas.clientHeight - object.offsetHeight - 8;
+          const left = Math.max(8, Math.min(maxX, (pointerEvent.clientX - floorRect.left - offsetX) / plannerZoom));
+          const top = Math.max(8, Math.min(maxY, (pointerEvent.clientY - floorRect.top - offsetY) / plannerZoom));
+          object.style.left = `${left}px`;
+          object.style.top = `${top}px`;
+          object.style.right = "auto";
+          object.style.bottom = "auto";
+        }
+
+        object.addEventListener("pointermove", move);
+        object.addEventListener("pointerup", () => {
+          object.removeEventListener("pointermove", move);
+          showToast(`${objectLabel(object)} déplacé · sauvegarde automatique`);
+        }, { once: true });
+      });
+    }
+
+    document.querySelectorAll(".floor-table, .draggable-plan").forEach(bindPlanObject);
+
+    document.querySelectorAll("[data-add-object]").forEach(button => {
+      button.addEventListener("click", () => {
+        const type = button.dataset.addObject;
+        let object;
+        if (type === "round" || type === "rectangle") {
+          createdTableCount += 1;
+          object = document.createElement("div");
+          object.className = `floor-table plan-table group-a${type === "rectangle" ? " rectangular" : ""}`;
+          object.dataset.seats = `0 / ${type === "rectangle" ? 12 : 10} places`;
+          object.style.left = `${335 + createdTableCount * 5}px`;
+          object.style.top = `${205 + createdTableCount * 5}px`;
+          object.innerHTML = `N${createdTableCount}${type === "round" ? '<span class="chair c1"></span><span class="chair c2"></span><span class="chair c3"></span><span class="chair c4"></span><span class="chair c5"></span><span class="chair c6"></span>' : ""}`;
+        } else {
+          object = document.createElement("div");
+          object.className = "plan-zone draggable-plan";
+          object.style.left = "330px";
+          object.style.top = "220px";
+          object.style.width = type === "door" ? "90px" : "145px";
+          object.style.height = type === "dance" ? "110px" : "42px";
+          object.style.background = type === "dance" ? "#a8d93d" : type === "buffet" ? "#8b6a32" : type === "door" ? "#7a2335" : "#23466f";
+          object.textContent = type === "stage" ? "Estrade" : type === "dance" ? "Piste de danse" : type === "buffet" ? "Buffet" : "Entrée";
+        }
+        planCanvas.appendChild(object);
+        bindPlanObject(object);
+        selectPlanObject(object);
+        showToast(`${objectLabel(object)} ajouté à la maquette`);
+      });
+    });
+
+    document.querySelectorAll("[data-group-filter]").forEach(button => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll("[data-group-filter]").forEach(item => item.classList.remove("active"));
+        button.classList.add("active");
+        const group = button.dataset.groupFilter;
+        document.querySelectorAll(".plan-table").forEach(table => {
+          table.hidden = group !== "all" && !table.classList.contains(group);
+        });
+      });
+    });
+
+    document.querySelectorAll("[data-planner-action]").forEach(button => {
+      button.addEventListener("click", () => {
+        const action = button.dataset.plannerAction;
+        if (action === "select" || action === "pan") {
+          document.querySelectorAll("[data-planner-action='select'], [data-planner-action='pan']").forEach(item => item.classList.remove("active"));
+          button.classList.add("active");
+        }
+        if (action === "duplicate" && selectedPlanObject) {
+          const clone = selectedPlanObject.cloneNode(true);
+          clone.classList.remove("selected");
+          clone.style.left = `${parseFloat(selectedPlanObject.style.left || 100) + 24}px`;
+          clone.style.top = `${parseFloat(selectedPlanObject.style.top || 100) + 24}px`;
+          planCanvas.appendChild(clone);
+          bindPlanObject(clone);
+          selectPlanObject(clone);
+        }
+        showToast({undo:"Dernière modification annulée",redo:"Modification rétablie",align:"Éléments alignés sur la grille",duplicate:"Élément dupliqué",grid:"Magnétisme de la grille activé",select:"Outil de sélection actif",pan:"Déplacement du canevas actif"}[action]);
+      });
+    });
+
+    function applyPlannerZoom() {
+      planCanvas.style.transform = `scale(${plannerZoom})`;
+      document.querySelector("#zoomValue").textContent = `${Math.round(plannerZoom * 100)}%`;
+    }
+    document.querySelector("#zoomIn").addEventListener("click", () => { plannerZoom = Math.min(1.4, plannerZoom + .1); applyPlannerZoom(); });
+    document.querySelector("#zoomOut").addEventListener("click", () => { plannerZoom = Math.max(.6, plannerZoom - .1); applyPlannerZoom(); });
+    document.querySelector("#zoomFit").addEventListener("click", () => { plannerZoom = .8; applyPlannerZoom(); });
+    document.querySelector("#tableNameInput").addEventListener("input", event => {
+      if (selectedPlanObject?.classList.contains("floor-table")) selectedPlanObject.childNodes[0].textContent = event.target.value;
+      document.querySelector("#selectedTableLabel").textContent = objectLabel(selectedPlanObject);
+    });
+    document.querySelector("#tableCapacityInput").addEventListener("input", event => {
+      if (selectedPlanObject?.classList.contains("floor-table")) selectedPlanObject.dataset.seats = `0 / ${event.target.value} places`;
+    });
+    document.querySelector("#tableGroupInput").addEventListener("change", event => {
+      if (!selectedPlanObject?.classList.contains("floor-table")) return;
+      selectedPlanObject.classList.remove("group-a", "group-b", "group-c", "group-d", "group-e");
+      selectedPlanObject.classList.add(["group-a", "group-b", "group-c", "group-d", "group-e"][event.target.selectedIndex]);
+      showToast("Groupe de la table mis à jour");
+    });
+    document.querySelector("#tableRotationInput").addEventListener("input", event => {
+      if (selectedPlanObject) selectedPlanObject.style.rotate = `${event.target.value}deg`;
+    });
+    document.querySelector("#deletePlanObject").addEventListener("click", () => {
+      if (!selectedPlanObject) return;
+      const label = objectLabel(selectedPlanObject);
+      selectedPlanObject.remove();
+      selectedPlanObject = null;
+      document.querySelector("#selectedTableLabel").textContent = "Aucun élément";
+      showToast(`${label} supprimé de la maquette`);
+    });
+  </script>
+</body>
+</html>
